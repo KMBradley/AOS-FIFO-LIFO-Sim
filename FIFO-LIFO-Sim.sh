@@ -6,7 +6,6 @@ username="Admin"
 #Colours
 red="\e[31m"
 green="\e[32m"
-blue="\e[34m"
 purple="\e[35m"
 cyan="\e[36m"
 default="\e[0m"
@@ -14,10 +13,11 @@ default="\e[0m"
 
 #Setup an exit handler function
 confirmQuit() {
-	trap - SIGINT	#Reset sigint to normal behaviour
+	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
 	echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
 	if [ "$leave" = "y" ]; then
 		clear
+		padTop "1"
 		centerText "Goodbye $username" "R" "$green" "$green"
 		sleep 2
 		clear
@@ -43,33 +43,33 @@ barDraw(){
 		colour=$default
 	fi
 
-	printf $colour	#Set colour for this bar instance
-	termWidth=$(( $termWidth-1))
-	if [ $1 = "T" ]; then
+	printf "$colour"	#Set colour for this bar instance
+	termWidth=$(( termWidth-1))
+	if [ "$1" = "T" ]; then
 		printf "╔"
 		while [ $barCounter -lt $termWidth ]; do
 			printf "%0.s═" $barCounter
-			barCounter=$(( $barCounter+1 ))
+			barCounter=$(( barCounter+1 ))
 		done
 		printf "╗"
-	elif [ $1 = "B" ]; then
+	elif [ "$1" = "B" ]; then
 		printf "╚"
 		while [ $barCounter -lt $termWidth ]; do
 			printf "%0.s═" $barCounter
-			barCounter=$(( $barCounter+1 ))
+			barCounter=$(( barCounter+1 ))
 		done
 		printf "╝"
-	elif [ $1 = "J" ]; then
+	elif [ "$1" = "J" ]; then
 		printf "╠"
 		while [ $barCounter -lt $termWidth ]; do
 			printf "%0.s═" $barCounter
-			barCounter=$(( $barCounter+1 ))
+			barCounter=$(( barCounter+1 ))
 		done
 		printf "╣"
-	elif [ $1 = "S" ]; then
+	elif [ "$1" = "S" ]; then
 		while [ $barCounter -le $((termWidth+1)) ]; do
 			printf "%0.s═" $barCounter
-			barCounter=$(( $barCounter+1 ))
+			barCounter=$(( barCounter+1 ))
 		done
 		printf ""
 	fi
@@ -89,46 +89,79 @@ centerText(){
 	fi
 	#https://unix.stackexchange.com/a/669693
 	termWidth=$(stty size | cut -d " " -f 2)
-	stringWidth=$(echo "$1" | wc -m)
-	needsPadding=$(( $termWidth-$stringWidth ))
-	padding=$(( $needsPadding/2 ))
+	needsPadding=$(( termWidth-${#1} ))
+	padding=$(( needsPadding/2 ))
 	#https://stackoverflow.com/a/8327481
-	if [ `expr $termWidth % 2` -eq 0 ]; then
-		text="$1 "
-	else
+	if [ $(( termWidth %2 )) -eq 0 ]; then
 		text="$1"
+	else
+		text=" $1"
 	fi
-	printf $colour	#Set colour for this instance
-	if [ $2 = "M" ]; then
-		printf "║"; printf "%*s" "$padding"; printf $textColour"$text"$colour; printf "%*s" "$(( padding-1 ))"; printf "║"
-	elif [ $2 = "R" ]; then
+	printf "$colour"	#Set colour for this instance
+	if [ "$2" = "M" ]; then
+		printf "║"; printf "%*s" "$(( padding-1 ))"; printf "$textColour""$text""$colour"; printf "%*s" "$(( padding-1 ))"; printf "║"
+	elif [ "$2" = "R" ]; then
 		printf "%*s" $padding; printf "$text"; printf "%*s" $padding;
 	fi
 	echo -e "\033[0m"	#Reset to term default colour
 }
 
+padTop(){
+	termHeight=$(stty size | cut -d " " -f 1)
+	if [ "$1" = "Menu" ]; then
+		if [ "$username" = "Admin" ]; then
+			needsPadding=$(( termHeight-18 ))
+			padding=$(( needsPadding/2 ))
+		else
+			needsPadding=$(( termHeight-16 ))
+			padding=$(( needsPadding/2 ))
+		fi
+
+		i=0
+		while [ "$i" -le "$padding" ]; do
+			echo ""
+			i=$(( i+1 ))
+		done
+	else
+		case $1 in		#exit function if non numerics (other than Menu) were passed; https://stackoverflow.com/a/3951175
+			''|*[!0-9]*) return ;;
+			*) ;;
+		esac
+
+		needsPadding=$(( termHeight-$1 ))
+		padding=$(( needsPadding/2 ))
+
+		i=0
+		while [ "$i" -le "$padding" ]; do
+			echo ""
+			i=$(( i+1 ))
+		done
+	fi
+}
+
 #Called with nothing
 drawMenu(){
-	barDraw "T" $cyan
-	centerText "Hewwo!" "M" $cyan $purple
-	barDraw "J" $cyan
-	centerText "" "M" $cyan
-	centerText "1)   Login    " "M" $cyan $purple
-	centerText "2)  FIFO Sim  " "M" $cyan $purple
-	centerText "3)  LIFO Sim  " "M" $cyan $purple
-	if [ "$username" == "Admin" ]; then
-		centerText "4) Pass change" "M" $cyan $purple
-		centerText "" "M" $cyan
-		barDraw "J" $cyan
-		centerText "" "M" $cyan
-		centerText "5)   Admin    " "M" $cyan $purple
+	padTop "Menu"
+	barDraw "T" "$cyan"
+	centerText "Hewwo!" "M" "$cyan" "$purple"
+	barDraw "J" "$cyan"
+	centerText "" "M" "$cyan"
+	centerText "1)   Login    " "M" "$cyan" "$purple"
+	centerText "2)  FIFO Sim  " "M" "$cyan" "$purple"
+	centerText "3)  LIFO Sim  " "M" "$cyan" "$purple"
+	if [ "$username" = "Admin" ]; then
+		centerText "4) Pass change" "M" "$cyan" "$purple"
+		centerText "" "M" "$cyan"
+		barDraw "J" "$cyan"
+		centerText "" "M" "$cyan"
+		centerText "5)   Admin    " "M" "$cyan" "$purple"
 	elif [ "$username" != "" ]; then
-		centerText "4) Pass change" "M" $cyan $purple
+		centerText "4) Pass change" "M" "$cyan" "$purple"
 	fi
-	centerText "" "M" $cyan
-	barDraw "J" $cyan
-	centerText "Exit" "M" $cyan $red
-	barDraw "B" $cyan
+	centerText "" "M" "$cyan"
+	barDraw "J" "$cyan"
+	centerText "Exit" "M" "$cyan" "$red"
+	barDraw "B" "$cyan"
 }
 
 #Menu options
@@ -136,14 +169,14 @@ loginHandler(){
 	echo "This will run the login code"
 }
 callFIFO(){
-	if [ "$username" == "" ]; then
+	if [ "$username" = "" ]; then
 		echo "Please login before trying to run a simulation"
 		return
 	fi
 	echo "This will run the FIFO simulation"
 }
 callLIFO(){
-	if [ "$username" == "" ]; then
+	if [ "$username" = "" ]; then
 		echo "Please login before trying to run a simulation"
 		return
 	fi
@@ -155,7 +188,7 @@ passChangeHandler(){
 	fi
 }
 adminStuffs(){
-	if [ "$username" == "Admin" ]; then
+	if [ "$username" = "Admin" ]; then
 		echo "This will run the admin utilites if the current user is logged in as admin"
 	fi
 }
@@ -163,31 +196,33 @@ adminStuffs(){
 #Debug output
 echo "Term width is: $(stty size | cut -d " " -f 2)"
 echo "Term height is: $(stty size | cut -d " " -f 1)"
+sleep 2
+clear
 
 #Program loop
 while true; do
 	drawMenu
 	echo -ne '\nEnter an option: '; read -r menuChoice
 
-	if [ "$menuChoice" == "1" ]; then
+	if [ "$menuChoice" = "1" ]; then
 		loginHandler
-	elif [ "$menuChoice" == "2" ]; then
+	elif [ "$menuChoice" = "2" ]; then
 		callFIFO
-	elif [ "$menuChoice" == "3" ]; then
+	elif [ "$menuChoice" = "3" ]; then
 		callLIFO
-	elif [ "$menuChoice" == "4" ]; then
+	elif [ "$menuChoice" = "4" ]; then
 		if [ "$username" != "" ]; then
 			passChangeHandler
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 		fi
-	elif [ "$menuChoice" == "5" ]; then
-		if [ "$username" == "Admin" ]; then
+	elif [ "$menuChoice" = "5" ]; then
+		if [ "$username" = "Admin" ]; then
 			adminStuffs
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 		fi
-	elif [ "$menuChoice" == "Exit" ] || [ "$menuChoice" == "Bye" ]; then
+	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ]; then
 		confirmQuit
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
