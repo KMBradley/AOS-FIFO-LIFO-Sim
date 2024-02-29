@@ -156,7 +156,7 @@ drawMainMenu(){
 		centerText "" "M" "$cyan"
 		centerText "5)   Admin    " "M" "$cyan" "$purple"
 	elif [ "$username" != "" ]; then
-		centerText "4) Pass change" "M" "$cyan" "$purple"
+		centerText "4) Pass Change" "M" "$cyan" "$purple"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -198,9 +198,7 @@ callLIFO(){
 	echo "This will run the FIFO simulation"
 }
 passChangeHandler(){
-	if [ "$username" != "" ]; then
-		echo "This will run the password change code only if user is logged in"
-	fi
+	echo "This will run the password change code only if user is logged in"
 }
 adminStuffs(){
 	if [ "$username" != "Admin" ]; then
@@ -209,11 +207,11 @@ adminStuffs(){
 	while true; do
 	drawAdminMenu
 		echo -ne '\nEnter an option: '; read -r adminChoice
-		if [ "$adminChoice" = "1" ]; then
+		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
 			echo "This will run user creation code"
-		elif [ "$adminChoice" = "2" ]; then
+		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
 			echo "This will run the user deletion code"
-		elif [ "$adminChoice" = "3" ]; then
+		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 			echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "Back" ]; then
 			echo "Returning to main menu"
@@ -242,19 +240,19 @@ while true; do
 	echo -ne '\nEnter an option: '; read -r menuChoice
 	clear	#Ensure there is no residual after entering an option
 
-	if [ "$menuChoice" = "1" ]; then
+	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "Login" ]; then
 		loginHandler
-	elif [ "$menuChoice" = "2" ]; then
+	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "FIFO Sim" ]; then
 		callFIFO
-	elif [ "$menuChoice" = "3" ]; then
+	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "LIFO Sim" ]; then
 		callLIFO
-	elif [ "$menuChoice" = "4" ]; then
+	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "Pass Change" ]; then
 		if [ "$username" != "" ]; then
 			passChangeHandler
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 		fi
-	elif [ "$menuChoice" = "5" ]; then
+	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "Admin" ]; then
 		if [ "$username" = "Admin" ]; then
 			adminStuffs
 		else
