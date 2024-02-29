@@ -140,7 +140,7 @@ padTop(){
 }
 
 #Called with nothing
-drawMenu(){
+drawMainMenu(){
 	padTop "Menu"
 	barDraw "T" "$cyan"
 	centerText "Hewwo!" "M" "$cyan" "$purple"
@@ -164,6 +164,21 @@ drawMenu(){
 	barDraw "B" "$cyan"
 }
 
+drawAdminMenu(){
+	padTop "Menu"
+	barDraw "T" "$green"
+	centerText "Administrative Options" "M" "$green" "$cyan"
+	barDraw "J" "$green"
+	centerText "" "M" "$green"
+	centerText "1)   Create an Account  " "M" "$green" "$cyan"
+	centerText "2)   Delete an Account  " "M" "$green" "$cyan"
+	centerText "3) Change an Account Pin" "M" "$green" "$cyan"
+	centerText "" "M" "$green" "$cyan"
+	barDraw "J" "$green"
+	centerText "Back" "M" "$green" "$red"
+	barDraw "B" "$green"
+}
+
 #Menu options
 loginHandler(){
 	echo "This will run the login code"
@@ -171,14 +186,14 @@ loginHandler(){
 callFIFO(){
 	if [ "$username" = "" ]; then
 		echo "Please login before trying to run a simulation"
-		return
+		return 1
 	fi
 	echo "This will run the FIFO simulation"
 }
 callLIFO(){
 	if [ "$username" = "" ]; then
 		echo "Please login before trying to run a simulation"
-		return
+		return 1
 	fi
 	echo "This will run the FIFO simulation"
 }
@@ -188,9 +203,31 @@ passChangeHandler(){
 	fi
 }
 adminStuffs(){
-	if [ "$username" = "Admin" ]; then
-		echo "This will run the admin utilites if the current user is logged in as admin"
+	if [ "$username" != "Admin" ]; then
+		return 1
 	fi
+	while true; do
+	drawAdminMenu
+		echo -ne '\nEnter an option: '; read -r adminChoice
+		if [ "$adminChoice" = "1" ]; then
+			echo "This will run user creation code"
+		elif [ "$adminChoice" = "2" ]; then
+			echo "This will run the user deletion code"
+		elif [ "$adminChoice" = "3" ]; then
+			echo "This will allow for a PIN change"
+		elif [ "$adminChoice" = "Back" ]; then
+			echo "Returning to main menu"
+			sleep 2
+			clear
+			return 0
+		elif [ "$adminChoice" = "Bye" ]; then
+			confirmQuit
+		else
+			echo "Please enter a valid option from the above menu"
+		fi
+		sleep 2
+		clear
+	done
 }
 
 #Debug output
@@ -201,8 +238,9 @@ clear
 
 #Program loop
 while true; do
-	drawMenu
+	drawMainMenu
 	echo -ne '\nEnter an option: '; read -r menuChoice
+	clear	#Ensure there is no residual after entering an option
 
 	if [ "$menuChoice" = "1" ]; then
 		loginHandler
