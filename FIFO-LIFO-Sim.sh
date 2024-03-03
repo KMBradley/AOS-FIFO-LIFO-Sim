@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 #Globals
-username="Admin"
+username=""
 
 #Colours
 red="\e[31m"
@@ -181,7 +181,43 @@ drawAdminMenu(){
 
 #Menu options
 loginHandler(){
-	echo "This will run the login code"
+	if [ "$username" != "" ]; then
+		echo -ne 'You are already logged in, logout? Y/N: '; read -r logout
+		if [ "$logout" = "Y" ]; then
+			username=""
+			clear
+			centerText "The user has been logged out successfully" "R" "$green" "$green"
+			return 0
+		else
+			echo "Logout cancelled"
+			return 0
+		fi
+	else
+		while true; do
+			echo -n "Enter username: "; read -r tempUsername
+			echo -n "Enter password: "; read -r -s password
+			echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
+			if [ "$loginConfirm" = "Y" ]; then
+				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" ]; then
+					echo "Username match found, checking password"
+					echo "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')"
+					if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
+						username="$tempUsername"
+						echo "Welcome $username"
+						tempUsername=""
+						password=""
+						return 1
+					else
+						echo "Incorrect password, try again"
+					fi
+				else
+					echo "Username not found, try again"
+				fi
+			else
+				echo "Please reenter username and password when prompted"
+			fi
+		done
+	fi
 }
 callFIFO(){
 	if [ "$username" = "" ]; then
