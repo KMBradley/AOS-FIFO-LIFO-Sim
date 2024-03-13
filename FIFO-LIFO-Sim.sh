@@ -15,7 +15,7 @@ default="\e[0m"
 confirmQuit() {
 	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
 	echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
-	if [ "$leave" = "y" ]; then
+	if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
 		clear
 		padTop "1"
 		centerText "Goodbye $username" "R" "$green" "$green"
@@ -183,7 +183,7 @@ drawAdminMenu(){
 loginHandler(){
 	if [ "$username" != "" ]; then
 		echo -ne 'You are already logged in, logout? Y/N: '; read -r logout
-		if [ "$logout" = "Y" ]; then
+		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
 			username=""
 			clear
 			padTop
@@ -202,11 +202,9 @@ loginHandler(){
 				echo "No input supplied, returning to menu"
 				return 0
 			fi
-			if [ "$loginConfirm" = "Y" ]; then
-				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" ]; then
-					echo "Username match found, checking password"
-					echo "$(cat ./UPP.db | grep "$tempUsername")"
-					echo "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')"
+			if [ "$loginConfirm" = "Y" ] || [ "$loginConfirm" = "y" ]; then
+				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then
+					echo -e "Username match found, checking password\n"
 					if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
 						username="$tempUsername"
 						echo "Welcome $username"
