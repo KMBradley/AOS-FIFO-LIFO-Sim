@@ -14,22 +14,26 @@ default="\e[0m"
 #Setup an exit handler function
 confirmQuit() {
 	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
-	echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
-	if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
-		clear
-		padTop "1"
-		centerText "Goodbye $username" "R" "$green" "$green"
-		sleep 2
-		clear
-		exit
-	else
-		clear
-		padTop "1"
-		echo "Shortly resuming program from prior prompt..."
-		trap "confirmQuit" INT
-		sleep 2
-		return
-	fi
+	while true; do
+		echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
+		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
+			clear
+			padTop "1"
+			centerText "Goodbye $username" "R" "$green" "$green"
+			sleep 2
+			clear
+			exit
+		elif [ "$leave" = "N" ] || [ "$leave" = "n" ]; then
+			clear
+			padTop "1"
+			echo "Shortly resuming program from prior prompt..."
+			trap "confirmQuit" INT
+			sleep 2
+			return
+		else
+			echo "Please enter Y/N to continue..."
+		fi
+	done
 }
 
 #Override SIGINT to do our bidding; https://stackoverflow.com/a/14702379
@@ -261,7 +265,7 @@ adminStuffs(){
 			sleep 2
 			clear
 			return 0
-		elif [ "$adminChoice" = "Bye" ]; then
+		elif [ "$adminChoice" = "Bye" ] || [ "$adminChoice" = "bye" ]; then
 			confirmQuit
 		else
 			echo "Please enter a valid option from the above menu"
@@ -301,7 +305,7 @@ while true; do
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 		fi
-	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ]; then
+	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ] || [ "$menuChoice" = "bye" ]; then
 		confirmQuit
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
