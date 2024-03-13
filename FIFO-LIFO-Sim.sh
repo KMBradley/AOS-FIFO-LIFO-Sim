@@ -23,6 +23,8 @@ confirmQuit() {
 		clear
 		exit
 	else
+		clear
+		padTop "1"
 		echo "Shortly resuming program from prior prompt..."
 		trap "confirmQuit" INT
 		sleep 2
@@ -149,14 +151,12 @@ drawMainMenu(){
 	centerText "1)   Login    " "M" "$cyan" "$purple"
 	centerText "2)  FIFO Sim  " "M" "$cyan" "$purple"
 	centerText "3)  LIFO Sim  " "M" "$cyan" "$purple"
+	centerText "4) Pass Change" "M" "$cyan" "$purple"
 	if [ "$username" = "Admin" ]; then
-		centerText "4) Pass change" "M" "$cyan" "$purple"
 		centerText "" "M" "$cyan"
 		barDraw "J" "$cyan"
 		centerText "" "M" "$cyan"
 		centerText "5)   Admin    " "M" "$cyan" "$purple"
-	elif [ "$username" != "" ]; then
-		centerText "4) Pass Change" "M" "$cyan" "$purple"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -186,7 +186,7 @@ loginHandler(){
 		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
 			username=""
 			clear
-			padTop
+			padTop "1"
 			centerText "The user has been logged out successfully" "R" "$green" "$green"
 			return 0
 		else
@@ -195,6 +195,7 @@ loginHandler(){
 		fi
 	else
 		while true; do
+			padTop "5"
 			echo -n "Enter username: "; read -r tempUsername
 			echo -n "Enter password: "; read -r -s password
 			echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
@@ -220,6 +221,8 @@ loginHandler(){
 			else
 				echo "Please re-enter username and password when prompted"
 			fi
+			sleep 0.5
+			clear
 		done
 	fi
 }
