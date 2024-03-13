@@ -186,6 +186,7 @@ loginHandler(){
 		if [ "$logout" = "Y" ]; then
 			username=""
 			clear
+			padTop
 			centerText "The user has been logged out successfully" "R" "$green" "$green"
 			return 0
 		else
@@ -197,9 +198,14 @@ loginHandler(){
 			echo -n "Enter username: "; read -r tempUsername
 			echo -n "Enter password: "; read -r -s password
 			echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
+			if [ "$loginConfirm" = "" ] || [ "${#tempUsername}" -eq 0 ]; then
+				echo "No input supplied, returning to menu"
+				return 0
+			fi
 			if [ "$loginConfirm" = "Y" ]; then
 				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" ]; then
 					echo "Username match found, checking password"
+					echo "$(cat ./UPP.db | grep "$tempUsername")"
 					echo "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')"
 					if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
 						username="$tempUsername"
@@ -214,7 +220,7 @@ loginHandler(){
 					echo "Username not found, try again"
 				fi
 			else
-				echo "Please reenter username and password when prompted"
+				echo "Please re-enter username and password when prompted"
 			fi
 		done
 	fi
