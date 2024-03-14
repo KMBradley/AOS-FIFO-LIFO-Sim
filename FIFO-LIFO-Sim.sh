@@ -236,7 +236,7 @@ callFIFO(){
 		return 1
 	fi
 	echo "This will run the FIFO simulation"
-	. ./FIFO-Sim.sh		#Source the FIFO-Sim file for functions
+	. ./HelperScripts/FIFO-Sim.sh		#Source the FIFO-Sim file for functions
 }
 callLIFO(){
 	if [ "$username" = "" ]; then
@@ -244,7 +244,7 @@ callLIFO(){
 		return 1
 	fi
 	echo "This will run the LIFO simulation"
-	. ./LIFO-Sim.sh		#Source the LIFO-Sim file for functions
+	. ./HelperScripts/LIFO-Sim.sh		#Source the LIFO-Sim file for functions
 }
 passChangeHandler(){
 	echo "This will run the password change code only if user is logged in"
@@ -256,9 +256,8 @@ adminStuffs(){
 	while true; do
 	drawAdminMenu
 		echo -ne '\nEnter an option: '; read -r adminChoice
-		. ./AdminStuffs.sh	#Source the Admin file for functions
+		. ./HelperScripts/AdminStuffs.sh	#Source the Admin file for functions
 		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
-			echo "This will run user creation code"
 			makeAccount
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
 			echo "This will run the user deletion code"

@@ -68,4 +68,3 @@ makeAccount(){
 deleteAccount(){
 	echo "AA"																											#TEMP	TEMP	TEMP
 }
-
