@@ -259,6 +259,7 @@ adminStuffs(){
 		. ./AdminStuffs.sh	#Source the Admin file for functions
 		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
 			echo "This will run user creation code"
+			makeAccount
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
 			echo "This will run the user deletion code"
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
