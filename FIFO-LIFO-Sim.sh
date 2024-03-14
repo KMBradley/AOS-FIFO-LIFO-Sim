@@ -176,7 +176,7 @@ drawAdminMenu(){
 	centerText "" "M" "$green"
 	centerText "1)   Create an Account  " "M" "$green" "$cyan"
 	centerText "2)   Delete an Account  " "M" "$green" "$cyan"
-	centerText "3) Change an Account Pin" "M" "$green" "$cyan"
+	#centerText "3) Change an Account Pin" "M" "$green" "$cyan"
 	centerText "" "M" "$green" "$cyan"
 	barDraw "J" "$green"
 	centerText "Back" "M" "$green" "$red"
@@ -261,8 +261,8 @@ adminStuffs(){
 			echo "This will run user creation code"
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
 			echo "This will run the user deletion code"
-		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
-			echo "This will allow for a PIN change"
+		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
+		#	echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "Back" ]; then
 			echo "Returning to main menu"
 			sleep 2
