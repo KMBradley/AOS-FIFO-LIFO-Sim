@@ -209,23 +209,28 @@ loginHandler(){
 			fi
 			if [ "$loginConfirm" = "Y" ] || [ "$loginConfirm" = "y" ]; then
 				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then
-					echo -e "Username match found, checking password\n"
-					if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
-						username="$tempUsername"
-						echo "Welcome $username"
-						tempUsername=""
-						password=""
-						return 1
+					echo "Username match found, checking account status"
+					if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
+						echo -e "User is set as active, checking password\n"
+						if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
+							username="$tempUsername"
+							echo "Welcome $username"
+							tempUsername=""
+							password=""
+							return 1			#Exit back to menu on successful login
+						else
+							echo "Incorrect password, try again";
+						fi
 					else
-						echo "Incorrect password, try again"
+						echo "Account is marked is inactive, please contact the administrator";
 					fi
 				else
-					echo "Username not found, try again"
+					echo "Username not found, try again";
 				fi
 			else
 				echo "Please re-enter username and password when prompted"
 			fi
-			sleep 0.5
+			sleep 5			#Pause for 5 seconds to allow user to read error message
 			clear
 		done
 	fi
