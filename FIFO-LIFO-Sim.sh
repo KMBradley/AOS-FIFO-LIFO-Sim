@@ -15,7 +15,8 @@ default="\e[0m"
 confirmQuit() {
 	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
 	while true; do
-		echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
+		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
+		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
 		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
 			clear
 			padTop "1"
@@ -26,12 +27,12 @@ confirmQuit() {
 		elif [ "$leave" = "N" ] || [ "$leave" = "n" ]; then
 			clear
 			padTop "1"
-			echo "Shortly resuming program from prior prompt..."
+			centerText "Shortly resuming program from prior prompt..." "R"
 			trap "confirmQuit" INT
 			sleep 2
 			return
 		else
-			echo "Please enter Y/N to continue..."
+			centerText "Please enter Y/N to continue..." "R"
 		fi
 	done
 }
@@ -84,7 +85,7 @@ barDraw(){
 
 #Called with: Text, Type, Optionally border colour and text colour
 centerText(){
-	if [ $# -eq 3 ]; then
+	if [ $# -eq 3 ] && [ ${#3} -gt 2 ]; then
 		colour=$3
 	elif [ $# -eq 4 ]; then
 		colour=$3
@@ -106,10 +107,18 @@ centerText(){
 	printf "$colour"	#Set colour for this instance
 	if [ "$2" = "M" ]; then
 		printf "║"; printf "%*s" "$(( padding-1 ))"; printf "$textColour""$text""$colour"; printf "%*s" "$(( padding-1 ))"; printf "║"
+		echo -e "\033[0m"	#Reset to term default colour
 	elif [ "$2" = "R" ]; then
 		printf "%*s" $padding; printf "$text"; printf "%*s" $padding;
+		echo -e "\033[0m"	#Reset to term default colour
+	elif [ "$2" = "Q" ]; then
+		if [ "$(( padding %2 ))" -eq 1 ]; then
+			padding=$(( padding-(($3+1)/2) ))
+		else
+			padding=$(( padding-($3/2) ))
+		fi
+		printf "%*s" $padding; printf "$text"		#Skip end padding so question is inline correctly
 	fi
-	echo -e "\033[0m"	#Reset to term default colour
 }
 
 padTop(){
@@ -186,7 +195,8 @@ drawAdminMenu(){
 #Menu options
 loginHandler(){
 	if [ "$username" != "" ]; then
-		echo -ne 'You are already logged in, logout? Y/N: '; read -r logout
+		#echo -n 'You are already logged in, logout? Y/N: '; read -r logout
+		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
 		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
 			username=""
 			clear
@@ -200,9 +210,12 @@ loginHandler(){
 	else
 		while true; do
 			padTop "5"
-			echo -n "Enter username: "; read -r tempUsername
-			echo -n "Enter password: "; read -r -s password
-			echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
+			#echo -n "Enter username: "; read -r tempUsername
+			#echo -n "Enter password: "; read -r -s password
+			centerText "Enter username: " "Q" "5"; read -r tempUsername
+			centerText "Enter password: " "Q"; read -r -s password
+			#echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
+			echo -e "\n"; centerText "So you wish to attempt to login as: $tempUsername? Y/N: " "Q" "1"; read -r loginConfirm
 			if [ "$loginConfirm" = "" ] || [ "${#tempUsername}" -eq 0 ]; then
 				echo "No input supplied, returning to menu"
 				return 0
@@ -214,7 +227,7 @@ loginHandler(){
 						echo -e "User is set as active, checking password\n"
 						if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
 							username="$tempUsername"
-							echo "Welcome $username"
+							centerText "Welcome $username" "R"
 							tempUsername=""
 							password=""
 							return 1			#Exit back to menu on successful login
@@ -223,6 +236,7 @@ loginHandler(){
 						fi
 					else
 						echo "Account is marked is inactive, please contact the administrator";
+						return 1
 					fi
 				else
 					echo "Username not found, try again";
