@@ -213,7 +213,7 @@ loginHandler(){
 			#echo -n "Enter username: "; read -r tempUsername
 			#echo -n "Enter password: "; read -r -s password
 			centerText "Enter username: " "Q" "5"; read -r tempUsername
-			centerText "Enter password: " "Q"; read -r -s password
+			centerText "Enter password: " "R"; read -r -s password
 			#echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
 			echo -e "\n"; centerText "So you wish to attempt to login as: $tempUsername? Y/N: " "Q" "1"; read -r loginConfirm
 			if [ "$loginConfirm" = "" ] || [ "${#tempUsername}" -eq 0 ]; then
@@ -221,7 +221,8 @@ loginHandler(){
 				return 0
 			fi
 			if [ "$loginConfirm" = "Y" ] || [ "$loginConfirm" = "y" ]; then
-				if [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then
+				#if [ "$(cat ./UPP.db | grep -c "$tempUsername" -ne 0 | cut -d"," -f3 | tr -d '\t')" = "" ]; then		#Allowed people to login pass only
+				if [ "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then	#Fixes above issue
 					echo "Username match found, checking account status"
 					if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
 						echo -e "User is set as active, checking password\n"
