@@ -177,21 +177,6 @@ drawMainMenu(){
 	barDraw "B" "$cyan"
 }
 
-drawAdminMenu(){
-	padTop "Menu"
-	barDraw "T" "$green"
-	centerText "Administrative Options" "M" "$green" "$cyan"
-	barDraw "J" "$green"
-	centerText "" "M" "$green"
-	centerText "1)   Create an Account  " "M" "$green" "$cyan"
-	centerText "2)   Delete an Account  " "M" "$green" "$cyan"
-	#centerText "3) Change an Account Pin" "M" "$green" "$cyan"
-	centerText "" "M" "$green" "$cyan"
-	barDraw "J" "$green"
-	centerText "Back" "M" "$green" "$red"
-	barDraw "B" "$green"
-}
-
 #Menu options
 loginHandler(){
 	if [ "$username" != "" ]; then
@@ -269,13 +254,28 @@ passChangeHandler(){
 	echo "This will run the password change code only if user is logged in"
 }
 adminStuffs(){
-	if [ "$username" != "Admin" ]; then
+	if [ "$username" != "Admin" ]; then									#Reject nonAdmin accounts
 		return 1
 	fi
 	while true; do
-	drawAdminMenu
-		echo -ne '\nEnter an option: '; read -r adminChoice
-		. ./HelperScripts/AdminStuffs.sh	#Source the Admin file for functions
+		#Draw admin menu
+		padTop "Menu"
+		barDraw "T" "$green"
+		centerText "Administrative Options" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "" "M" "$green"
+		centerText "1)   Create an Account  " "M" "$green" "$cyan"
+		centerText "2)   Delete an Account  " "M" "$green" "$cyan"
+		#centerText "3) Change an Account Pin" "M" "$green" "$cyan"		#Pins should be consistent, removed
+		centerText "" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "Back" "M" "$green" "$red"
+		barDraw "B" "$green"
+
+		echo -ne '\nEnter an option: '; read -r adminChoice				#Prompt for option
+		. ./HelperScripts/AdminStuffs.sh								#Source the Admin file for functions
+
+		#Check input
 		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
 			makeAccount
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
