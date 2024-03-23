@@ -12,7 +12,7 @@ default="\e[0m"
 #printf colour https://stackoverflow.com/a/5412776
 
 #Setup an exit handler function
-confirmQuit() {
+confirmQuit(){
 	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
 	while true; do
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
@@ -39,6 +39,18 @@ confirmQuit() {
 
 #Override SIGINT to do our bidding; https://stackoverflow.com/a/14702379
 trap "confirmQuit" INT
+
+#Will echo for now rather than export to file
+logger(){
+	echo "$#: $@"
+	if [ "$#" = 0 ]; then
+		echo "Logger, no args"
+		echo "Current term is: $(echo $TERM)"
+		echo "Current time is: $(date -Iseconds)"
+	else
+		echo "It has args!"
+	fi
+}
 
 #Called with Type, Optionally colour
 barDraw(){
@@ -327,6 +339,9 @@ while true; do
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 		fi
+	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "FuncTest" ]; then
+		echo "Function testing mode"
+		logger
 	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ] || [ "$menuChoice" = "bye" ]; then
 		confirmQuit
 	else
