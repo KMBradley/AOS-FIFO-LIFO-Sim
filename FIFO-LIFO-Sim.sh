@@ -13,14 +13,17 @@ default="\e[0m"
 
 #Setup an exit handler function
 confirmQuit(){
-	trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behavoir on exit
 	while true; do
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
 		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
 		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
 			clear
+			trap - INT	#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behaviour on exit
 			padTop "1"
 			centerText "Goodbye $username" "R" "$green" "$green"
+			#Log footer
+			echo -e "\nEND OF RUN" >> log.txt
+			printf "|" >> log.txt; printf "%50s" | tr " " "-" >> log.txt; printf "|\n\n\n" >> log.txt
 			sleep 2
 			clear
 			exit
@@ -49,6 +52,7 @@ logger(){
 		echo "Current time is: $(date -Iseconds)"
 	else
 		echo "It has args!"
+		echo "This is a test" | tee test.txt
 	fi
 }
 
@@ -318,9 +322,18 @@ clear
 
 #Program loop
 while true; do
+	#Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
+	printf "|" >> log.txt; printf "%50s" | tr " " "-" >> log.txt; printf "|\n" >> log.txt
+	echo -e "\nNew run start for terminal: $(echo $TERM) at time: $(date -Iseconds)" >> log.txt
+
 	drawMainMenu
-	echo -ne '\nEnter an option: '; read -r menuChoice
+	echo -ne "\nEnter an option: "; read -r menuChoice
 	clear	#Ensure there is no residual after entering an option
+
+	if [ "$username" = "" ]; then
+		echo "Unknown user entered $menuChoice on the main menu" >> log.txt
+	else
+		echo "User $username entered $menuChoice on the main menu" >> log.txt
 
 	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "Login" ]; then
 		loginHandler
@@ -333,12 +346,14 @@ while true; do
 			passChangeHandler
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
+			echo "Non logged in user attempted to call for a password change" >> log.txt
 		fi
 	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "Admin" ]; then
 		if [ "$username" = "Admin" ]; then
 			adminStuffs
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
+			echo "Unauthorized user attempted to access the admin menu" >> log.txt
 		fi
 	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "FuncTest" ]; then
 		echo "Function testing mode"
