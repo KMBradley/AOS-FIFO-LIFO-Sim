@@ -14,6 +14,9 @@ default="\e[0m"
 #Setup an exit handler function
 confirmQuit(){
 	while true; do
+		if [ "$#" = 0 ]; then
+			echo -e "\nSIGINT CAPTURED, exit menu displayed" >> log.txt
+		fi
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
 		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
 		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
@@ -22,8 +25,8 @@ confirmQuit(){
 			padTop "1"
 			centerText "Goodbye $username" "R" "$green" "$green"
 			#Log footer
-			echo -e "\nEND OF RUN" >> log.txt
-			printf "|" >> log.txt; printf "%50s" | tr " " "-" >> log.txt; printf "|\n\n\n" >> log.txt
+			echo -e "\nEND OF RUN\n" >> log.txt
+			printf "|" >> log.txt; printf "%80s" | tr " " "-" >> log.txt; printf "|\n\n\n" >> log.txt
 			sleep 2
 			clear
 			exit
@@ -31,6 +34,7 @@ confirmQuit(){
 			clear
 			padTop "1"
 			centerText "Shortly resuming program from prior prompt..." "R"
+			echo -e "Exit cancelled, program resuming\n" >> log.txt
 			trap "confirmQuit" INT
 			sleep 2
 			return
@@ -305,7 +309,7 @@ adminStuffs(){
 			clear
 			return 0
 		elif [ "$adminChoice" = "Bye" ] || [ "$adminChoice" = "bye" ]; then
-			confirmQuit
+			confirmQuit "C"
 		else
 			echo "Please enter a valid option from the above menu"
 		fi
@@ -320,11 +324,12 @@ echo "Term height is: $(stty size | cut -d " " -f 1)"
 sleep 2
 clear
 
+#Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
+printf "|" >> log.txt; printf "%80s" | tr " " "-" >> log.txt; printf "|" >> log.txt
+echo -e "\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
+
 #Program loop
 while true; do
-	#Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-	printf "|" >> log.txt; printf "%50s" | tr " " "-" >> log.txt; printf "|\n" >> log.txt
-	echo -e "\nNew run start for terminal: $(echo $TERM) at time: $(date -Iseconds)" >> log.txt
 
 	drawMainMenu
 	echo -ne "\nEnter an option: "; read -r menuChoice
@@ -360,7 +365,7 @@ while true; do
 		echo "Function testing mode"
 		logger
 	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ] || [ "$menuChoice" = "bye" ]; then
-		confirmQuit
+		confirmQuit "C"
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 	fi
