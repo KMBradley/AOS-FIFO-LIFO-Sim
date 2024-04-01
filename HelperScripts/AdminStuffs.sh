@@ -19,7 +19,10 @@ makeAccount(){
 		return 1
 	elif [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then													#Check if username is in use (Active or Disabled)
 		echo "Username is already in use, please try another username"
-
+		return 1
+	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then																				#Test for non alphanumerics
+		echo "Username contains non-alphanumeric characters, please try another username"
+		return 1
 	#Password creation and validation
 	else
 		echo "Username is available"
@@ -34,6 +37,9 @@ makeAccount(){
 			return 1
 		elif [ "${#tempPassword}" -gt 5 ]; then																			#Check if password more than 5 chars
 			echo "Password is too long, please try again"
+			return 1
+		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then																			#Test for non alphanumerics
+			echo "Password contains non-alphanumeric characters, please try another username"							#I hate that specials aren't allowed here by the brief, but eh
 			return 1
 
 		#Pin creation and validation
@@ -51,6 +57,9 @@ makeAccount(){
 			elif [ "${#tempPin}" -gt 3 ]; then																			#Check if pin more than 3 chars
 				echo "Pin is too long, please try again"
 				return 1
+			elif [[ "$1" =~ [^0-9] ]]; then
+				echo "Pin contains non numerics, please try again"
+				return 1
 
 			#Save account info
 			else
@@ -59,6 +68,7 @@ makeAccount(){
 				thisID=$(( currentMaxID+1 ))																			#Add one for this user ID
 				toWrite="$thisID,\t$tempUsername,\t$tempPassword,\t$tempPin,\tACTIVE"									#Format info to match file (comma tab seperated)
 				echo -e $toWrite >> ./UPP.db																			#Write info to file
+
 			fi
 		fi
 	fi

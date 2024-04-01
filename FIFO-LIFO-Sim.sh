@@ -26,7 +26,7 @@ confirmQuit(){
 			centerText "Goodbye $username" "R" "$green" "$green"
 			#Log footer
 			echo -e "\nEND OF RUN\n" >> log.txt
-			printf "|" >> log.txt; printf "%80s" | tr " " "-" >> log.txt; printf "|\n\n\n" >> log.txt
+			printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣\n\n\n" >> log.txt
 			sleep 2
 			clear
 			exit
@@ -325,14 +325,11 @@ sleep 2
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-printf "|" >> log.txt; printf "%80s" | tr " " "-" >> log.txt; printf "|" >> log.txt
+printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣" >> log.txt
 echo -e "\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
 
 #Program loop
 while true; do
-	#Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-	printf "|" >> log.txt; printf "%50s" | tr " " "-" >> log.txt; printf "|\n" >> log.txt
-	echo -e "\nNew run start for terminal: $(echo $TERM) at time: $(date -Iseconds)" >> log.txt
 
 	drawMainMenu
 	echo -ne "\nEnter an option: "; read -r menuChoice
