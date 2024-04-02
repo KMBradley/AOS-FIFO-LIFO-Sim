@@ -310,7 +310,7 @@ adminStuffs(){
 		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
 			makeAccount
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
-			echo "This will run the user deletion code"
+			deleteAccount
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 		#	echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "Back" ]; then
@@ -319,7 +319,7 @@ adminStuffs(){
 			clear
 			return 0
 		elif [ "$adminChoice" = "Bye" ] || [ "$adminChoice" = "bye" ]; then
-			confirmQuit "C"
+			confirmQuit "ADMIN-MENU"
 		else
 			echo "Please enter a valid option from the above menu"
 		fi

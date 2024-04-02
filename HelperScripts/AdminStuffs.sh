@@ -78,6 +78,7 @@ makeAccount(){
 
 #This will deactivate the account, not delete it. Makes log checking easier and UIDs always one larger than the last
 deleteAccount(){
+	clear
 	padTop "5"
 	centerText "Account deletion: Procede with caution" "R" "$red"
 
@@ -86,26 +87,26 @@ deleteAccount(){
 	if [ "$usedIdentifier" = "Bye" ]; then
 		confirmQuit "ACCOUNT-DEL"
 	elif [ "${#usedIdentifier}" -eq 5 ]; then
-		echo "This is a username"
+		#echo "This is a username"
 		delType="UN"
 	elif [[ "$usedIdentifier" =~ [^0-9] ]]; then
-		echo "This is garbage"
+		#echo "This is garbage"
 		return 2
 	elif [[ "${#usedIdentifier}" -le 4 ]]; then
-		echo "This is prolly an ID"
+		#echo "This is prolly an ID"
 		delType="ID"
 	else			#Advancement get! \nHow did we even get here?
 		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R"
-		return 2
+		return 1
 	fi
 
 	#Find who the ID belongs to
-	if [ "delType" = "ID" ]; then
+	if [ "$delType" = "ID" ]; then
 		if [ "$(cat ./UPP.db | grep -c "$usedIdentifier")" -eq 0 ]; then
 			centerText "ID number $usedIdentifier does not exist; Please check input and retry" "R"
 			return 1
 		else
-			delUsername=$(cat ./UPP.db | grep -c "$usedIdentifier" | cut -d"," -f1 | tr -d '\t')
+			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')
 			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByID
 			if [ "$confirmDelByID" = "N" ]; then
 				centerText "Aborting..." "R"
@@ -114,12 +115,12 @@ deleteAccount(){
 		fi
 
 	#Check the usernanme actually exists
-	elif [ "delType" = "ID" ]; then
+	elif [ "$delType" = "UN" ]; then
 		if [ "$(cat ./UPP.db | grep -c "$usedIdentifier")" -eq 0 ]; then
 			centerText "Username $usedIdentifier does not exist; Please check input and retry" "R"
 			return 1
 		else
-			delUsername=$(cat ./UPP.db | grep -c "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')	#Not needed, but maybe helps sanitise
+			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')	#Not needed, but maybe helps sanitise
 			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByUN
 			if [ "$confirmDelByUN" = "N" ]; then
 				centerText "Aborting..." "R"
@@ -131,12 +132,32 @@ deleteAccount(){
 	#Final check and mark as inactive
 	clear
 	padTop 4
-	centerText "Continuing will mark '$delUsername' as inactive, this cannot be reverted for now." "R"
+	centerText "Continuing will mark $delUsername as inactive, this cannot be reverted for now." "R" "$red"
 	centerText "Continue? Y/N: " "Q" "1"; read -r confirmDelete
 
 	if [ "$confirmDelete" = "N" ] || [ "$confirmDelete" = "n" ]; then
 		centerText "Aborting..." "R"
 		return 1
-	if [ "$confirmDelete" = "Y" ] || [ "$confirmDelete" = "y" ]; then
+	elif [ "$confirmDelete" = "Y" ] || [ "$confirmDelete" = "y" ]; then
 
+		#This block is an abomination, and I may as well be Doc Frankenstein for having made it
+		#But; "IT'S ALIVE!!"
+		targetID=$(cat ./UPP.db | grep -c "$delUsername" | cut -d"," -f1 | tr -d '\t')	#Get the ID of the user
+		targetLine=$(( targetID+2 ))	#Add two so ID is now line number (line 1 is header, line 2 is admin[id 0])
+		oldLine=$(cat ./UPP.db | grep "$delUsername")
+		newLine="${oldLine//ACTIVE/INACTIVE}"	#Bashism to change active to inactive, works on tinycore sh too!
+
+		linesBefore=$(( targetLine-1 ))
+		linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-$targetLine ))
+
+		mv UPP.db UPP.db.bak									#Create backup of UPP.db to pull old info from
+		echo "$(head -n $linesBefore UPP.db.bak)" > UPP.db		#Copy all lines before the user to modify
+		echo "$newLine" >> UPP.db								#Write modified user info
+		echo "$(tail -n $linesAfter UPP.db.bak)" >> UPP.db		#Copy all lines after the user to modify
+		rm UPP.db.bak
+
+		clear; padTop "1"; centerText "User $delUsername successfully marked as inactive" "R" "$red"
+		sleep 2
+		return 0
+	fi
 }
