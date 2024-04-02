@@ -14,8 +14,10 @@ default="\e[0m"
 #Setup an exit handler function
 confirmQuit(){
 	while true; do
-		if [ "$#" = 0 ]; then
+		if [ "$#" -eq 0 ]; then
 			echo -e "\nSIGINT CAPTURED, exit menu displayed" >> log.txt
+		elif [ "$#" -eq 1 ]; then
+			echo -e "\nExit requested from $1; exit menu displayed" >> log.txt
 		fi
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
 		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
@@ -215,10 +217,14 @@ loginHandler(){
 	else
 		while true; do
 			padTop "5"
-			#echo -n "Enter username: "; read -r tempUsername
-			#echo -n "Enter password: "; read -r -s password
 			centerText "Enter username: " "Q" "5"; read -r tempUsername
+			if [ "$tempUsername" = "Bye" ]; then	#Check for exit intent
+				confirmQuit "LOGIN"
+			fi
 			centerText "Enter password: " "R"; read -r -s password
+			if [ "$tempPassword" = "Bye" ]; then	#Check for exit intent
+				confirmQuit "LOGIN"
+			fi
 			#echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
 			echo -e "\n"; centerText "So you wish to attempt to login as: $tempUsername? Y/N: " "Q" "1"; read -r loginConfirm
 			if [ "$loginConfirm" = "" ] || [ "${#tempUsername}" -eq 0 ]; then
@@ -247,8 +253,12 @@ loginHandler(){
 				else
 					echo "Username not found, try again";
 				fi
+			elif [ "$loginConfirm" = "N" ] || [ "$loginConfirm" = "n" ]; then
+				centerText "Please re-enter username and password when prompted" "R"
+			elif [ "$loginConfirm" = "Bye" ]; then			#Check for exit intent
+				confirmQuit "LOGIN"
 			else
-				echo "Please re-enter username and password when prompted"
+				centerText "Unknown option, please try again"
 			fi
 			sleep 5			#Pause for 5 seconds to allow user to read error message
 			clear
@@ -365,7 +375,7 @@ while true; do
 		echo "Function testing mode"
 		logger
 	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ] || [ "$menuChoice" = "bye" ]; then
-		confirmQuit "C"
+		confirmQuit "MENU"
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 	fi

@@ -11,7 +11,9 @@ makeAccount(){
 
 	#Username creation and availability check
 	echo -ne "\nEnter username: "; read -r tempUsername
-	if [ "${#tempUsername}" -lt 5 ]; then																				#Check if username less than 5 chars
+	if [ "$tempUsername" = "Bye" ]; then
+		confirmQuit "ACCOUNT-MAKE"
+	elif [ "${#tempUsername}" -lt 5 ]; then																				#Check if username less than 5 chars
 		echo "Username is too short, please try again"
 		return 1
 	elif [ "${#tempUsername}" -gt 5 ]; then																				#Check if username more than 5 chars
@@ -76,5 +78,65 @@ makeAccount(){
 
 #This will deactivate the account, not delete it. Makes log checking easier and UIDs always one larger than the last
 deleteAccount(){
-	echo "AA"																											#TEMP	TEMP	TEMP
+	padTop "5"
+	centerText "Account deletion: Procede with caution" "R" "$red"
+
+	#Figure out if a username, ID number or random garbage was entered
+	echo -ne "\nEnter username or user ID: "; read -r usedIdentifier
+	if [ "$usedIdentifier" = "Bye" ]; then
+		confirmQuit "ACCOUNT-DEL"
+	elif [ "${#usedIdentifier}" -eq 5 ]; then
+		echo "This is a username"
+		delType="UN"
+	elif [[ "$usedIdentifier" =~ [^0-9] ]]; then
+		echo "This is garbage"
+		return 2
+	elif [[ "${#usedIdentifier}" -le 4 ]]; then
+		echo "This is prolly an ID"
+		delType="ID"
+	else			#Advancement get! \nHow did we even get here?
+		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R"
+		return 2
+	fi
+
+	#Find who the ID belongs to
+	if [ "delType" = "ID" ]; then
+		if [ "$(cat ./UPP.db | grep -c "$usedIdentifier")" -eq 0 ]; then
+			centerText "ID number $usedIdentifier does not exist; Please check input and retry" "R"
+			return 1
+		else
+			delUsername=$(cat ./UPP.db | grep -c "$usedIdentifier" | cut -d"," -f1 | tr -d '\t')
+			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByID
+			if [ "$confirmDelByID" = "N" ]; then
+				centerText "Aborting..." "R"
+				return 1
+			fi
+		fi
+
+	#Check the usernanme actually exists
+	elif [ "delType" = "ID" ]; then
+		if [ "$(cat ./UPP.db | grep -c "$usedIdentifier")" -eq 0 ]; then
+			centerText "Username $usedIdentifier does not exist; Please check input and retry" "R"
+			return 1
+		else
+			delUsername=$(cat ./UPP.db | grep -c "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')	#Not needed, but maybe helps sanitise
+			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByUN
+			if [ "$confirmDelByUN" = "N" ]; then
+				centerText "Aborting..." "R"
+				return 1
+			fi
+		fi
+	fi
+
+	#Final check and mark as inactive
+	clear
+	padTop 4
+	centerText "Continuing will mark '$delUsername' as inactive, this cannot be reverted for now." "R"
+	centerText "Continue? Y/N: " "Q" "1"; read -r confirmDelete
+
+	if [ "$confirmDelete" = "N" ] || [ "$confirmDelete" = "n" ]; then
+		centerText "Aborting..." "R"
+		return 1
+	if [ "$confirmDelete" = "Y" ] || [ "$confirmDelete" = "y" ]; then
+
 }
