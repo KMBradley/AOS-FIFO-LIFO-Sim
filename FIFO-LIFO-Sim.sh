@@ -28,7 +28,8 @@ confirmQuit(){
 			centerText "Goodbye $username" "R" "$green" "$green"
 			#Log footer
 			echo -e "\nEND OF RUN\n" >> log.txt
-			printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣\n\n\n" >> log.txt
+			#Remove lower footer line to cleanup log
+			#printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣\n\n\n" >> log.txt
 			sleep 2
 			clear
 			exit

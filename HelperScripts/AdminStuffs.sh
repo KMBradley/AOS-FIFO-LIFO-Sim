@@ -83,31 +83,32 @@ deleteAccount(){
 	centerText "Account deletion: Procede with caution" "R" "$red"
 
 	#Figure out if a username, ID number or random garbage was entered
-	echo -ne "\nEnter username or user ID: "; read -r usedIdentifier
+	echo -e "\n"; centerText "Enter username or user ID: " "Q" "4"; read -r usedIdentifier
 	if [ "$usedIdentifier" = "Bye" ]; then
 		confirmQuit "ACCOUNT-DEL"
 	elif [ "${#usedIdentifier}" -eq 5 ]; then
 		#echo "This is a username"
 		delType="UN"
 	elif [[ "$usedIdentifier" =~ [^0-9] ]]; then
-		#echo "This is garbage"
+		centerText "This is not a valid username or pin, please try again" "R" "$red"
 		return 2
 	elif [[ "${#usedIdentifier}" -le 4 ]]; then
 		#echo "This is prolly an ID"
 		delType="ID"
 	else			#Advancement get! \nHow did we even get here?
-		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R"
+		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R" "$purple"
 		return 1
 	fi
 
 	#Find who the ID belongs to
 	if [ "$delType" = "ID" ]; then
-		if [ "$(cat ./UPP.db | grep -c "$usedIdentifier")" -eq 0 ]; then
+		if [ "$(cat ./UPP.db | grep $usedIdentifier | cut -d',' -f1 | tr -d '\t')" -ne "$usedIdentifier" ]; then
 			centerText "ID number $usedIdentifier does not exist; Please check input and retry" "R"
 			return 1
 		else
 			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')
-			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByID
+			#echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByID
+			echo -e "\n"; centerText "So you wish to delete user $delUsername? Y/N: " "Q" "1"; read -r confirmDelByID
 			if [ "$confirmDelByID" = "N" ]; then
 				centerText "Aborting..." "R"
 				return 1
@@ -121,12 +122,26 @@ deleteAccount(){
 			return 1
 		else
 			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')	#Not needed, but maybe helps sanitise
-			echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByUN
+			#echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByUN
+			echo -e "\n"; centerText "So you wish to delete user $delUsername? Y/N: " "Q" "1"; read -r confirmDelByUN
 			if [ "$confirmDelByUN" = "N" ]; then
 				centerText "Aborting..." "R"
 				return 1
 			fi
 		fi
+	fi
+
+	#Pin confirm
+	echo -e "\n"; centerText "Enter pin for user $delUsername?: " "Q" "3"; read -r -s pinCheck; echo -e "\n"
+	#Above ending echo is there because this didn't add a new line at the end like all prior invocations
+	if [ ${#pinCheck} -ne 3 ]; then
+		centerText "This is not a valid pin" "R" "$red"
+		return 1
+	elif [ "$(cat ./UPP.db | grep "$delUsername" | cut -d',' -f4 | tr -d '\t')" -eq "$pinCheck" ]; then
+		centerText "Pin confirmed" "R" "$green"; sleep 2
+	else
+		centerText "Incorrect pin entered; Please check input and try again" "R"
+		return 1
 	fi
 
 	#Final check and mark as inactive
@@ -150,6 +165,7 @@ deleteAccount(){
 		linesBefore=$(( targetLine-1 ))
 		linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-$targetLine ))
 
+		#Option 7 from https://www.baeldung.com/linux/insert-line-specific-line-number it is jank, but it works; Thus is it jank?
 		mv UPP.db UPP.db.bak									#Create backup of UPP.db to pull old info from
 		echo "$(head -n $linesBefore UPP.db.bak)" > UPP.db		#Copy all lines before the user to modify
 		echo "$newLine" >> UPP.db								#Write modified user info
