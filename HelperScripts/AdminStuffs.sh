@@ -157,7 +157,7 @@ deleteAccount(){
 
 		#This block is an abomination, and I may as well be Doc Frankenstein for having made it
 		#But; "IT'S ALIVE!!"
-		targetID=$(cat ./UPP.db | grep -c "$delUsername" | cut -d"," -f1 | tr -d '\t')	#Get the ID of the user
+		targetID=$(cat ./UPP.db | grep "$delUsername" | cut -d"," -f1 | tr -d '\t')	#Get the ID of the user
 		targetLine=$(( targetID+2 ))	#Add two so ID is now line number (line 1 is header, line 2 is admin[id 0])
 		oldLine=$(cat ./UPP.db | grep "$delUsername")
 		newLine="${oldLine//ACTIVE/INACTIVE}"	#Bashism to change active to inactive, works on tinycore sh too!
