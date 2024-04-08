@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 #Globals
-username=""
+username="Admin"
 
 #Colours
 red="\e[31m"
@@ -78,27 +78,27 @@ barDraw(){
 	if [ "$1" = "T" ]; then
 		printf "╔"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" $barCounter
+			printf "%0.s═" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
 		printf "╗"
 	elif [ "$1" = "B" ]; then
 		printf "╚"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" $barCounter
+			printf "%0.s═" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
 		printf "╝"
 	elif [ "$1" = "J" ]; then
 		printf "╠"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" $barCounter
+			printf "%0.s═" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
 		printf "╣"
 	elif [ "$1" = "S" ]; then
 		while [ $barCounter -le $((termWidth+1)) ]; do
-			printf "%0.s═" $barCounter
+			printf "%0.s═" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
 		printf ""
@@ -144,6 +144,7 @@ centerText(){
 	fi
 }
 
+#Called with the number of lines of text to show on one screen
 padTop(){
 	termHeight=$(stty size | cut -d " " -f 1)
 	if [ "$1" = "Menu" ]; then
@@ -175,6 +176,32 @@ padTop(){
 			i=$(( i+1 ))
 		done
 	fi
+}
+
+#Called with a pause value
+loadBar(){
+	count=1
+	termWidth=$(stty size | cut -d " " -f 2)
+	barScaler=$(( $(( termWidth-20 )) ))
+	while [ "$count" -le 20 ]; do
+		refresh="$(( count%2 ))"
+		if [ "$refresh" -eq 0 ]; then
+			clear
+			bar=$(printf "$purple"; echo -n "<"; printf "%*s" $(( $(( barScaler/25 ))*count )) | tr " " "-"; echo ">")
+			barLen=$(( $(( $(( barScaler/25 ))*count ))+2 ))
+			leftGap=$(( $(( termWidth-barLen ))/2 ))
+			textSize=$(( $3+4 ))
+			padTop "3"
+			printf "%*s" $leftGap; printf "$bar"; echo ""
+			printf "$green"; printf "%*s" $(( $(( termWidth-textSize ))/2 )); echo "$2 $(( count*5 ))%"
+			printf "%*s" $leftGap; printf "$bar"; echo ""
+		fi
+		count=$(( count+1 ))
+		sleep $1
+	done
+	clear
+	padTop "1"
+	centerText "Loading Complete!" "$purple"
 }
 
 #Called with nothing
@@ -423,10 +450,11 @@ adminStuffs(){
 	done
 }
 
+#Start Program
 #Debug output
-echo "Term width is: $(stty size | cut -d " " -f 2)"
-echo "Term height is: $(stty size | cut -d " " -f 1)"
-sleep 2
+#echo "Term width is: $(stty size | cut -d " " -f 2)"
+#echo "Term height is: $(stty size | cut -d " " -f 1)"
+#sleep 2
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
@@ -461,6 +489,7 @@ while true; do
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
 			echo "Unauthorized user attempted to access the admin menu" >> log.txt
+			sleep 2
 		fi
 	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "FuncTest" ]; then
 		echo "Function testing mode"
@@ -469,7 +498,7 @@ while true; do
 		confirmQuit "MENU"
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
+		sleep 2
 	fi
-	sleep 2
 	clear
 done

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-echo "FIFO Addon File called!"
+#echo "FIFO Addon File called!"
 
 genQueue(){
 	if [ $# -eq 0 ]; then
@@ -49,5 +49,17 @@ genQueue(){
 	return 0
 }
 
-rm "simdata_$username.job"
-genQueue 10
+runFIFO(){
+
+	while true; do
+		echo -n "Load FIFO?"; read -r start
+		if [ "$start" = "y" ]; then
+			loadBar "0.3" "FIFO Sim Loading: " "18"
+		else
+			return 0
+		fi
+	done
+}
+
+#genQueue 10
+runFIFO
