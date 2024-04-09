@@ -1,53 +1,34 @@
 #!/usr/bin/env sh
 
-echo "LIFO Addon File called!"
+loadBar "0.2" "LIFO Sim Loading: "
+local queue="$(cat simdata_$username.job)"
+echo "Queue to work with: $queue"
 
-genQueue(){
-	if [ $# -eq 0 ]; then
-		count=10
+local byteAmount=$(( $(( ${#queue}+1))/4 ))
+echo "Queue size: $byteAmount"
+read -r
+
+clear
+#Only center vertically if there is enough space to
+if [ $(stty size | cut -d " " -f 1) -gt $(( byteAmount+4 )) ]; then
+	padTop 12
+fi
+
+local count=0
+while [ "$count" -lt "$byteAmount" ]; do
+	local count=$(( count+1 ))
+	local byteNo=$(( $(( byteAmount-count ))+1))
+	if [ "$count" = 1 ]; then
+		centerText "LAST IN was $(echo $queue | cut -d',' -f$byteNo)" "R" "$green"
+	elif [ "$count" = "$byteAmount" ]; then
+		centerText "FIRST IN was $(echo $queue | cut -d',' -f$byteNo)" "R" "$green"
 	else
-		count=$1
-	fi
-	byteNo=0
-
-	while [ "$byteNo" -lt "$count" ]; do
-		#Generate the byte
-		byte=$(head /dev/urandom | od -An -N1 -d)	#https://linuxsimply.com/bash-scripting-tutorial/operator/arithmetic-operators/random-number/
-		byte=$(( $byte % 100 ))						#% 100 was decent advise from a friend for how to constrain the output of od
-
-		#0 pad if needed
-		if [ "${#byte}" -eq 1 ]; then
-			cleanedByte="B0$byte"
-		elif [ "${#byte}" -eq 2 ]; then
-			cleanedByte="B$byte"
-		fi
-
-		#B00 is invalid, so change to B01
-		if [ "$cleanedByte" = "B00" ]; then
-			cleanedByte="B01"
-		fi
-
-		#Collision check and write
-		#Check if file doesn't exist (it shouldn't) then make that new file
-		if [ ! -f "simdata_$username.job" ]; then
-			byteNo=$(( $byteNo+1 ))		#Increment by 1 as always ran
-			echo -n "$cleanedByte," > "simdata_$username.job"
+		if [ ${#byteNo} = 1 ]; then
+			centerText "Byte 0$byteNo is $(echo $queue | cut -d',' -f$byteNo)" "R" "$purple"
 		else
-			#Check if byte is already written
-			if [ "$(grep -c $cleanedByte simdata_$username.job)" -eq 0 ]; then
-				byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
-				if [ "$byteNo" -lt "$count" ]; then
-					echo -n "$cleanedByte," >> "simdata_$username.job"
-				else
-					echo "$cleanedByte" >> "simdata_$username.job"
-				fi
-			else
-				echo "Byte collision, regenning byte $(( $byteNo+1 ))"
-			fi
+			centerText "Byte $byteNo is $(echo $queue | cut -d',' -f$byteNo)" "R" "$purple"
 		fi
-	done
-	return 0
-}
+	fi
+done
 
-rm "simdata_$username.job"
-genQueue 10
+echo ""; centerText "Done! Press enter to exit back to menu" "Q" "1"; read -r
