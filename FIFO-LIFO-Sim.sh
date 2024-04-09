@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 #Globals
-username=""
+username="Admin"
 
 #Colours
 red="\e[31m"
@@ -260,11 +260,14 @@ genQueue(){
 			loadBar "0.1" "Generating..." "13"
 		fi
 		#Check if byte is already written
-		if [ "$(grep -c $cleanedByte simdata_$username.job)" -eq 0 ]; then
+		if [ "$(grep -c $cleanedByte simdata_$username.job)" -ne 0 ]; then
+			echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
+		elif [ "$byteNo" -eq "$(( count-1)) " ]; then
+			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
+			echo -n "$cleanedByte" >> "simdata_$username.job"
+		else
 			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
 			echo -n "$cleanedByte," >> "simdata_$username.job"
-		else
-			echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
 		fi
 	done
 	centerText "Regeneration complete, please press enter to continue" "Q" "0"; read -r
