@@ -216,15 +216,16 @@ drawMainMenu(){
 	centerText "Hewwo!" "M" "$cyan" "$purple"
 	barDraw "J" "$cyan"
 	centerText "" "M" "$cyan"
-	centerText "1)   Login    " "M" "$cyan" "$purple"
-	centerText "2)  FIFO Sim  " "M" "$cyan" "$purple"
-	centerText "3)  LIFO Sim  " "M" "$cyan" "$purple"
-	centerText "4) Pass Change" "M" "$cyan" "$purple"
+	centerText "1)     Login      " "M" "$cyan" "$purple"
+	centerText "2) Regen Sim Data " "M" "$cyan" "$purple"
+	centerText "3)    FIFO Sim    " "M" "$cyan" "$purple"
+	centerText "4)    LIFO Sim    " "M" "$cyan" "$purple"
+	centerText "5)   Pass Change  " "M" "$cyan" "$purple"
 	if [ "$username" = "Admin" ]; then
 		centerText "" "M" "$cyan"
 		barDraw "J" "$cyan"
 		centerText "" "M" "$cyan"
-		centerText "5)   Admin    " "M" "$cyan" "$purple"
+		centerText "6)   Admin    " "M" "$cyan" "$purple"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -264,7 +265,7 @@ genQueue(){
 		fi
 		#Check if byte is already written
 		if [ "$(grep -c $cleanedByte simdata_$username.job)" -ne 0 ]; then
-			echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
+			#echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
 		elif [ "$byteNo" -eq "$(( count-1)) " ]; then
 			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
 			echo -n "$cleanedByte" >> "simdata_$username.job"
@@ -542,14 +543,19 @@ while true; do
 
 	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "Login" ]; then
 		loginHandler
-	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "FIFO Sim" ]; then
+	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "Regen Sim Data" ]; then
+		clear
+		padTop 1
+		centerText "Enter how many bytes you wish to generate: " "Q" "2"; read -r newSimData
+		genQueue "$newSimData"
+	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "FIFO Sim" ]; then
 		callFIFO
-	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "LIFO Sim" ]; then
+	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "LIFO Sim" ]; then
 		callLIFO
-	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "Pass Change" ]; then
+	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "Pass Change" ]; then
 		#Anyone should be able to call for a password change
 		passChangeHandler
-	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "Admin" ]; then
+	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "Admin" ]; then
 		if [ "$username" = "Admin" ]; then
 			adminStuffs
 		else
