@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 
-echo "Admin Addon File sourced!"
+#echo "Admin Addon File sourced!"
 
 makeAccount(){
 	clear
-	padTop "8"																											#Pad screen assuming 8 lines of text
-	centerText "Account Creation" "R"																					#Show mode to admin
+	padTop "8"																						#Pad screen assuming 8 lines of text
+	centerText "Account Creation" "R"																#Show mode to admin
 	echo ""
 	centerText "Usernames and passwords are 5 alphanumeric chars long, pins are 3 numeric chars long" "R" "$red"		#Reminder for username, password and pin formatting
 
@@ -13,16 +13,16 @@ makeAccount(){
 	echo -ne "\nEnter username: "; read -r tempUsername
 	if [ "$tempUsername" = "Bye" ]; then
 		confirmQuit "ACCOUNT-MAKE"
-	elif [ "${#tempUsername}" -lt 5 ]; then																				#Check if username less than 5 chars
+	elif [ "${#tempUsername}" -lt 5 ]; then															#Check if username less than 5 chars
 		echo "Username is too short, please try again"
 		return 1
-	elif [ "${#tempUsername}" -gt 5 ]; then																				#Check if username more than 5 chars
+	elif [ "${#tempUsername}" -gt 5 ]; then															#Check if username more than 5 chars
 		echo "Username is too long, please try again"
 		return 1
-	elif [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then													#Check if username is in use (Active or Disabled)
+	elif [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then								#Check if username is in use (Active or Disabled)
 		echo "Username is already in use, please try another username"
 		return 1
-	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then																				#Test for non alphanumerics
+	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then															#Test for non alphanumerics
 		echo "Username contains non-alphanumeric characters, please try another username"
 		return 1
 	#Password creation and validation
@@ -31,17 +31,17 @@ makeAccount(){
 		echo -ne "\nEnter desired password: "; read -r -s tempPassword
 		echo -ne "\nRe-enter desired password: "; read -r -s confirmPassword
 		echo ""
-		if [ "$tempPassword" != "$confirmPassword" ]; then																#Check if passwords match
+		if [ "$tempPassword" != "$confirmPassword" ]; then											#Check if passwords match
 			echo "Passwords do not match, please try again"
 			return 1
-		elif [ "${#tempPassword}" -lt 5 ]; then																			#Check if password less than 5 chars
+		elif [ "${#tempPassword}" -lt 5 ]; then														#Check if password less than 5 chars
 			echo "Password is too short, please try again"
 			return 1
-		elif [ "${#tempPassword}" -gt 5 ]; then																			#Check if password more than 5 chars
+		elif [ "${#tempPassword}" -gt 5 ]; then														#Check if password more than 5 chars
 			echo "Password is too long, please try again"
 			return 1
-		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then																			#Test for non alphanumerics
-			echo "Password contains non-alphanumeric characters, please try another username"							#I hate that specials aren't allowed here by the brief, but eh
+		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then														#Test for non alphanumerics
+			echo "Password contains non-alphanumeric characters, please try another username"		#I hate that specials aren't allowed here by the brief, but eh
 			return 1
 
 		#Pin creation and validation
@@ -50,13 +50,13 @@ makeAccount(){
 			echo -ne "\nEnter desired pin "; read -r -s tempPin
 			echo -ne "\nConfirm pin "; read -r -s confirmPin
 			echo ""
-			if [ "$tempPin" != "$confirmPin" ]; then																	#Check if pins match
+			if [ "$tempPin" != "$confirmPin" ]; then												#Check if pins match
 				echo "Pins do not match, please try again"
 				return 1
-			elif [ "${#tempPin}" -lt 3 ]; then																			#Check if pin less than 3 chars
+			elif [ "${#tempPin}" -lt 3 ]; then														#Check if pin less than 3 chars
 				echo "Pin is too short, please try again"
 				return 1
-			elif [ "${#tempPin}" -gt 3 ]; then																			#Check if pin more than 3 chars
+			elif [ "${#tempPin}" -gt 3 ]; then														#Check if pin more than 3 chars
 				echo "Pin is too long, please try again"
 				return 1
 			elif [[ "$1" =~ [^0-9] ]]; then
@@ -66,11 +66,13 @@ makeAccount(){
 			#Save account info
 			else
 				echo "Pins matched, writing information to database"
-				currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)														#Find current max user ID
-				thisID=$(( currentMaxID+1 ))																			#Add one for this user ID
-				toWrite="$thisID,\t$tempUsername,\t$tempPassword,\t$tempPin,\tACTIVE"									#Format info to match file (comma tab seperated)
-				echo -e $toWrite >> ./UPP.db																			#Write info to file
+				currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)									#Find current max user ID
+				thisID=$(( currentMaxID+1 ))														#Add one for this user ID
+				toWrite="$thisID,\t$tempUsername,\t$tempPassword,\t$tempPin,\tACTIVE"				#Format info to match file (comma tab seperated)
+				echo -e $toWrite >> ./UPP.db														#Write info to file
 
+				touch ../simdata_$tempUsername.job													#Make the simdata file
+				return 0
 			fi
 		fi
 	fi
