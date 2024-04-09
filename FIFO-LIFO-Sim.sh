@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 #Globals
-username="Admin"
+username=""
 
 #Colours
 red="\e[31m"
@@ -20,6 +20,7 @@ confirmQuit(){
 			echo -e "\nExit requested from $1; exit menu displayed" >> log.txt
 		fi
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
+		padTop 1
 		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
 		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
 			clear
@@ -180,7 +181,7 @@ padTop(){
 
 #Called with a pause value
 loadBar(){
-	count=1
+	local count=1
 	termWidth=$(stty size | cut -d " " -f 2)
 	barScaler=$(( $(( termWidth-20 )) ))
 	while [ "$count" -le 20 ]; do
@@ -202,6 +203,7 @@ loadBar(){
 	clear
 	padTop "1"
 	centerText "Loading Complete!" "$purple"
+	return 0
 }
 
 #Called with nothing
@@ -229,12 +231,16 @@ drawMainMenu(){
 
 #Apparently this should be here and not in the FIFO/LIFO files
 genQueue(){
-	if [ $# -eq 0 ]; then
-		count=10
+	if [ "$#" -eq 0 ]; then
+		local count=10
 	else
-		count=$1
+		local count=$1
 	fi
 	byteNo=0
+
+	#Clear simdata file
+	rm "simdata_$username.job"
+	touch "simdata_$username.job"
 
 	while [ "$byteNo" -lt "$count" ]; do
 		#Generate the byte
@@ -248,26 +254,20 @@ genQueue(){
 			cleanedByte="B$byte"
 		fi
 
-		#Collision check and write
-		#Check if file doesn't exist (it shouldn't) then make that new file
-		if [ ! -f "simdata_$username.job" ]; then
-			byteNo=$(( $byteNo+1 ))		#Increment by 1 as always ran
-			echo -n "$cleanedByte," > "simdata_$username.job"
-			echo "Adding $cleanedByte at start of queue FIRST IN"
+		if [ "$byteNo" -eq "0" ]; then
+			echo -e "Adding $cleanedByte at start of queue \n--FIRST IN--"
+			sleep 2
+			loadBar "0.1" "Generating..." "13"
+		fi
+		#Check if byte is already written
+		if [ "$(grep -c $cleanedByte simdata_$username.job)" -eq 0 ]; then
+			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
+			echo -n "$cleanedByte," >> "simdata_$username.job"
 		else
-			#Check if byte is already written
-			if [ "$(grep -c $cleanedByte simdata_$username.job)" -eq 0 ]; then
-				byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
-				if [ "$byteNo" -lt "$count" ]; then
-					echo -n "$cleanedByte," >> "simdata_$username.job"
-				else
-					echo "$cleanedByte" >> "simdata_$username.job"
-				fi
-			else
-				echo "Byte collision, regenning byte $(( $byteNo+1 ))"
-			fi
+			echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
 		fi
 	done
+	centerText "Regeneration complete, please press enter to continue" "Q" "0"; read -r
 	return 0
 }
 
@@ -275,6 +275,7 @@ genQueue(){
 loginHandler(){
 	if [ "$username" != "" ]; then
 		#echo -n 'You are already logged in, logout? Y/N: '; read -r logout
+		padTop 1
 		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
 		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
 			username=""
@@ -314,7 +315,24 @@ loginHandler(){
 							centerText "Welcome $username" "R"
 							tempUsername=""
 							password=""
-							return 1			#Exit back to menu on successful login
+
+							#Ask about regenning sim data
+							clear
+							padTop 3
+							centerText "Do you wish to regen your simdata? Y/N: " "Q" "1"; read -r regenQueue
+							if [ "$regenQueue" = "Y" ] || [ "$regenQueue" = "y" ]; then
+								centerText "How many bytes do you want to generate? (Default 10): " "Q" "2"; read -r queueSize
+								if [ "$queueSize" = "" ] || [[ "$queueSize" =~ [^0-9] ]]; then
+									queueSize=10
+								fi
+								centerText "Regenerating sim data..." "R"
+								sleep 2
+								genQueue "$queueSize"
+							else
+								centerText "Skipping simdata regen..." "R"
+							fi
+
+							return 0			#Exit back to menu on successful login
 						else
 							echo "Incorrect password, try again";
 						fi

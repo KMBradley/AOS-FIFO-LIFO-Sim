@@ -72,6 +72,7 @@ makeAccount(){
 				echo -e $toWrite >> ./UPP.db														#Write info to file
 
 				touch ../simdata_$tempUsername.job													#Make the simdata file
+				genQueue 10																			#Fill simdata file
 				return 0
 			fi
 		fi
