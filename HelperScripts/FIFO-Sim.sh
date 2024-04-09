@@ -22,16 +22,12 @@ genQueue(){
 			cleanedByte="B$byte"
 		fi
 
-		#B00 is invalid, so change to B01
-		if [ "$cleanedByte" = "B00" ]; then
-			cleanedByte="B01"
-		fi
-
 		#Collision check and write
 		#Check if file doesn't exist (it shouldn't) then make that new file
 		if [ ! -f "simdata_$username.job" ]; then
 			byteNo=$(( $byteNo+1 ))		#Increment by 1 as always ran
 			echo -n "$cleanedByte," > "simdata_$username.job"
+			echo "Adding $cleanedByte at start of queue FIRST IN"
 		else
 			#Check if byte is already written
 			if [ "$(grep -c $cleanedByte simdata_$username.job)" -eq 0 ]; then
@@ -52,12 +48,18 @@ genQueue(){
 runFIFO(){
 
 	while true; do
-		echo -n "Load FIFO?"; read -r start
-		if [ "$start" = "y" ]; then
-			loadBar "0.3" "FIFO Sim Loading: " "18"
-		else
-			return 0
-		fi
+		#echo -n "Load FIFO?"; read -r start
+		#if [ "$start" = "y" ]; then
+		loadBar "0.3" "FIFO Sim Loading: " "18"
+		#else
+		#	return 0
+		#fi
+
+		genQueue 10
+		queue="$(cat simdata_$username.job)"
+		echo $queue
+		rm "simdata_$username.job"
+		read -r temp
 	done
 }
 
