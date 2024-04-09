@@ -1,18 +1,35 @@
 #!/usr/bin/env sh
 
-#echo "FIFO Addon File called!"
+#while true; do
+	loadBar "0.05" "FIFO Sim Loading: "
+	local queue="$(cat simdata_$username.job)"
+	echo $queue
 
+	local byteAmount=$(( $(( ${#queue}+1))/4 ))
+	echo "$byteAmount"
+	read -r
 
-#echo -n "Load FIFO?"; read -r start
-#if [ "$start" = "y" ]; then
-loadBar "0.2" "FIFO Sim Loading: " "18"
-#else
-#	return 0
-#fi
-queue="$(cat simdata_$username.job)"
-echo $queue
-read -r temp
+	clear
+	#Only center vertically if there is enough space to
+	if [ $(stty size | cut -d " " -f 1) -gt $(( byteAmount+4 )) ]; then
+		padTop 12
+	fi
 
+	local count=0
+	while [ "$count" -lt "$byteAmount" ]; do
+		local count=$(( count+1 ))
+		if [ "$count" = 1 ]; then
+			centerText "FIRST IN was $(echo $queue | cut -d',' -f$count)" "R" "$green"
+		elif [ "$count" = "$byteAmount" ]; then
+			centerText "LAST IN was $(echo $queue | cut -d',' -f$count)" "R" "$green"
+		else
+			if [ ${#count} = 1 ]; then
+				centerText "Byte 0$count is $(echo $queue | cut -d',' -f$count)" "R" "$purple"
+			else
+				centerText "Byte $count is $(echo $queue | cut -d',' -f$count)" "R" "$purple"
+			fi
+		fi
+	done
 
-#genQueue 10
-#runFIFO
+	echo ""; centerText "Done! Press enter to exit back to menu" "Q" "1"; read -r
+#done

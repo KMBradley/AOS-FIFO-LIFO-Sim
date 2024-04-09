@@ -150,17 +150,20 @@ padTop(){
 	termHeight=$(stty size | cut -d " " -f 1)
 	if [ "$1" = "Menu" ]; then
 		if [ "$username" = "Admin" ]; then
-			needsPadding=$(( termHeight-18 ))
+			needsPadding=$(( termHeight-19 ))
+			padding=$(( needsPadding/2 ))
+		elif [ "$username" != "" ]; then
+			needsPadding=$(( termHeight-16 ))
 			padding=$(( needsPadding/2 ))
 		else
-			needsPadding=$(( termHeight-16 ))
+			needsPadding=$(( termHeight-15 ))
 			padding=$(( needsPadding/2 ))
 		fi
 
-		i=0
-		while [ "$i" -le "$padding" ]; do
+		local padCount=0
+		while [ "$padCount" -le "$padding" ]; do
 			echo ""
-			i=$(( i+1 ))
+			padCount=$(( padCount+1 ))
 		done
 	else
 		case $1 in		#exit function if non numerics (other than Menu) were passed; https://stackoverflow.com/a/3951175
@@ -191,7 +194,7 @@ loadBar(){
 			bar=$(printf "$purple"; echo -n "<"; printf "%*s" $(( $(( barScaler/25 ))*count )) | tr " " "-"; echo ">")
 			barLen=$(( $(( $(( barScaler/25 ))*count ))+2 ))
 			leftGap=$(( $(( termWidth-barLen ))/2 ))
-			textSize=$(( $3+4 ))
+			textSize=$(( "${#2}"+4 ))
 			padTop "3"
 			printf "%*s" $leftGap; printf "$bar"; echo ""
 			printf "$green"; printf "%*s" $(( $(( termWidth-textSize ))/2 )); echo "$2 $(( count*5 ))%"
@@ -257,7 +260,7 @@ genQueue(){
 		if [ "$byteNo" -eq "0" ]; then
 			echo -e "Adding $cleanedByte at start of queue \n--FIRST IN--"
 			sleep 2
-			loadBar "0.1" "Generating..." "13"
+			loadBar "0.1" "Generating..."
 		fi
 		#Check if byte is already written
 		if [ "$(grep -c $cleanedByte simdata_$username.job)" -ne 0 ]; then
@@ -328,8 +331,6 @@ loginHandler(){
 								if [ "$queueSize" = "" ] || [[ "$queueSize" =~ [^0-9] ]]; then
 									queueSize=10
 								fi
-								centerText "Regenerating sim data..." "R"
-								sleep 2
 								genQueue "$queueSize"
 							else
 								centerText "Skipping simdata regen..." "R"
