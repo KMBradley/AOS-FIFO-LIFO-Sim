@@ -20,6 +20,7 @@ confirmQuit(){
 			echo -e "\nExit requested from $1; exit menu displayed" >> log.txt
 		fi
 		#echo -ne "\nAre you sure you wish to exit? [y/n]: "; read -r leave
+		clear
 		padTop 1
 		echo -e "\n"; centerText "Are you sure you wish to exit? [y/n]: " "Q" "1"; read -r leave
 		if [ "$leave" = "Y" ] || [ "$leave" = "y" ]; then
@@ -66,29 +67,29 @@ barDraw(){
 	printf "$colour"	#Set colour for this bar instance
 	termWidth=$(( termWidth-1))
 	if [ "$1" = "T" ]; then
-		printf "╔"
+		printf "/"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" #$barCounter
+			printf "%0.s-" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
-		printf "╗"
+		printf "\\"
 	elif [ "$1" = "B" ]; then
-		printf "╚"
+		printf "\\"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" #$barCounter
+			printf "%0.s-" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
-		printf "╝"
+		printf "/"
 	elif [ "$1" = "J" ]; then
-		printf "╠"
+		printf "|"
 		while [ $barCounter -lt $termWidth ]; do
-			printf "%0.s═" #$barCounter
+			printf "%0.s-" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
-		printf "╣"
+		printf "|"
 	elif [ "$1" = "S" ]; then
 		while [ $barCounter -le $((termWidth+1)) ]; do
-			printf "%0.s═" #$barCounter
+			printf "%0.s-" #$barCounter
 			barCounter=$(( barCounter+1 ))
 		done
 		printf ""
@@ -119,7 +120,7 @@ centerText(){
 	fi
 	printf "$colour"	#Set colour for this instance
 	if [ "$2" = "M" ]; then
-		printf "║"; printf "%*s" "$(( padding-1 ))"; printf "$textColour""$text""$colour"; printf "%*s" "$(( padding-1 ))"; printf "║"
+		printf "|"; printf "%*s" "$(( padding-1 ))"; printf "$textColour""$text""$colour"; printf "%*s" "$(( padding-1 ))"; printf "|"
 		echo -e "\033[0m"	#Reset to term default colour
 	elif [ "$2" = "R" ]; then
 		printf "%*s" $padding; printf "$text"; printf "%*s" $padding;
@@ -195,7 +196,7 @@ loadBar(){
 	done
 	clear
 	padTop "1"
-	centerText "Loading Complete!" "$purple"
+	centerText "Loading Complete!" "$default"
 	return 0
 }
 
@@ -203,19 +204,19 @@ loadBar(){
 drawMainMenu(){
 	padTop "Menu"
 	barDraw "T" "$cyan"
-	centerText "Hewwo!" "M" "$cyan" "$purple"
+	centerText "Hewwo!" "M" "$cyan" "$default"
 	barDraw "J" "$cyan"
 	centerText "" "M" "$cyan"
-	centerText "1)     Login      " "M" "$cyan" "$purple"
-	centerText "2) Regen Sim Data " "M" "$cyan" "$purple"
-	centerText "3)    FIFO Sim    " "M" "$cyan" "$purple"
-	centerText "4)    LIFO Sim    " "M" "$cyan" "$purple"
-	centerText "5)   Pass Change  " "M" "$cyan" "$purple"
+	centerText "1)     Login      " "M" "$cyan" "$default"
+	centerText "2) Regen Sim Data " "M" "$cyan" "$default"
+	centerText "3)    FIFO Sim    " "M" "$cyan" "$default"
+	centerText "4)    LIFO Sim    " "M" "$cyan" "$default"
+	centerText "5)   Pass Change  " "M" "$cyan" "$default"
 	if [ "$username" = "Admin" ]; then
 		centerText "" "M" "$cyan"
 		barDraw "J" "$cyan"
 		centerText "" "M" "$cyan"
-		centerText "6)   Admin    " "M" "$cyan" "$purple"
+		centerText "6)   Admin    " "M" "$cyan" "$default"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -515,7 +516,7 @@ adminStuffs(){
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-printf "╠" >> log.txt; printf "%80s" | tr " " "=" >> log.txt; printf "╣" >> log.txt
+printf "|" >> log.txt; printf "%80s" | tr " " "=" >> log.txt; printf "|" >> log.txt
 echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
 
 #Program loop
