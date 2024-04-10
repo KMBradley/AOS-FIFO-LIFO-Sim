@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
 #Globals
-username="admin"
-
+username=""
+startUnix=$(date +%s)
 #Colours
 red="\e[31m"
 green="\e[32m"
@@ -29,7 +29,15 @@ confirmQuit(){
 			padTop "1"
 			centerText "Goodbye $username" "R" "$green" "$green"
 			#Log footer
-			echo -e "\nEND OF RUN\n" >> log.txt
+			local endUnix=$(date +%s)
+			local totalTime=$(( endUnix-startUnix ))
+
+			#Time conversion from https://stackoverflow.com/a/40782247
+			local hoursRan=$(( totalTime/3600 ))
+			local minutesRan=$(( $(( totalTimex/60 ))-$(( 60*hoursRan )) ))
+			local secondsRan=$(( totalTime%60 ))
+			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" | tee -a log.txt
+			echo -e "END OF RUN at $(date -Iseconds)\n" >> log.txt
 			#Remove lower footer line to cleanup log
 			#printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣\n\n\n" >> log.txt
 			sleep 2
@@ -477,13 +485,14 @@ adminStuffs(){
 	fi
 	while true; do
 		#Draw admin menu
-		padTop "12"
+		padTop "13"
 		barDraw "T" "$green"
 		centerText "Administrative Options" "M" "$green" "$cyan"
 		barDraw "J" "$green"
 		centerText "" "M" "$green"
 		centerText "1)   Create an Account  " "M" "$green" "$cyan"
 		centerText "2)   Delete an Account  " "M" "$green" "$cyan"
+		centertext "3)    Sim Statistics    " "M" "$green" "$cyan"
 		#centerText "3) Change an Account Pin" "M" "$green" "$cyan"		#Pins should be consistent, removed
 		centerText "" "M" "$green" "$cyan"
 		barDraw "J" "$green"
@@ -498,6 +507,8 @@ adminStuffs(){
 			makeAccount
 		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
 			deleteAccount
+		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Stats" ]; then
+			simStats
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 		#	echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "Back" ]; then
@@ -554,7 +565,7 @@ while true; do
 		#Anyone should be able to call for a password change
 		passChangeHandler
 	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "Admin" ]; then
-		if [ "$username" = "Admin" ]; then
+		if [ "$username" = "admin" ]; then
 			adminStuffs
 		else
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
