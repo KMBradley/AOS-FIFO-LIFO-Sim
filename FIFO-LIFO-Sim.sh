@@ -52,17 +52,6 @@ confirmQuit(){
 trap "confirmQuit" INT
 
 #Will echo for now rather than export to file
-logger(){
-	echo "$#: $@"
-	if [ "$#" = 0 ]; then
-		echo "Logger, no args"
-		echo "Current term is: $(echo $TERM)"
-		echo "Current time is: $(date -Iseconds)"
-	else
-		echo "It has args!"
-		echo "This is a test" | tee test.txt
-	fi
-}
 
 #Called with Type, Optionally colour
 barDraw(){
@@ -285,6 +274,7 @@ loginHandler(){
 		padTop 1
 		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
 		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
+
 			username=""
 			clear
 			padTop "1"
@@ -365,7 +355,6 @@ callFIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
-	echo "This will run the FIFO simulation"
 	. ./HelperScripts/FIFO-Sim.sh		#Source the FIFO-Sim file for functions
 }
 callLIFO(){
@@ -373,105 +362,104 @@ callLIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
-	echo "This will run the LIFO simulation"
 	. ./HelperScripts/LIFO-Sim.sh		#Source the LIFO-Sim file for functions
 }
 passChangeHandler(){
-	while true; do
-		padTop "3"
-		centerText "Password change" "R" "$green"
-		centerText "Please enter the username you wish to change the password for: " "Q" "5"; read -r tempUsername
-		if [ "$tempUsername" = "Bye" ]; then	#Check for exit intent
-			confirmQuit "PASS-CHANGE"
-		fi
-		centerText "Please enter the pin for user $tempUsername: " "Q" "3"; read -r -s checkPin
-		if [ "$checkPin" = "Bye" ]; then	#Check for exit intent
-			confirmQuit "PASS-CHANGE"
-		fi
+	padTop "3"
+	centerText "Password change" "R" "$green"
+	centerText "Please enter the username you wish to change the password for: " "Q" "5"; read -r tempUsername
+	if [ "$tempUsername" = "Bye" ]; then	#Check for exit intent
+		confirmQuit "PASS-CHANGE"
+	fi
+	centerText "Please enter the pin for user $tempUsername: " "Q" "3"; read -r -s checkPin
+	if [ "$checkPin" = "Bye" ]; then	#Check for exit intent
+		confirmQuit "PASS-CHANGE"
+	fi
 
-		#Check entered info
-		if [ "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then
-			echo "Username match found, checking account status"
-			if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
-				echo "User is set as active, checking pin"
-				if [ "$checkPin" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f4 | tr -d '\t')" ]; then
-					echo "Pin match"
-				else
-					centerText "Pin does not match, please try again" "R" "$red"
-					sleep 2
-					clear
-					return 1
-				fi
+	#Check entered info
+	if [ "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then
+		echo "Username match found, checking account status"
+		if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
+			echo "User is set as active, checking pin"
+			if [ "$checkPin" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f4 | tr -d '\t')" ]; then
+				echo "Pin match"
 			else
-				centerText "User is marked as inactive, please contact the administrator" "R" "$purple"
+				centerText "Pin does not match, please try again" "R" "$red"
 				sleep 2
 				clear
 				return 1
 			fi
 		else
-			centerText "Username not found, please try again" "R" "$purple"
+			centerText "User is marked as inactive, please contact the administrator" "R" "$purple"
 			sleep 2
 			clear
 			return 1
 		fi
-
-		#At this point, we know the username is valid and active, and that the user entered the correct pin
+	else
+		centerText "Username not found, please try again" "R" "$purple"
+		sleep 2
 		clear
-		padTop "6"
-		centerText "Details confirmed" "R" "$green"
-		centerText "Please enter the new password for user $tempUsername: " "Q" "1"; read -rs newPassword; echo ""
-		if [ "$newPassword" = "Bye" ]; then				#Check for exit intent
-			confirmQuit "PASS-CHANGE"
-		fi
-		centerText "Please confirm the new password: " "Q" "1"; read -rs confirmPassword
-		if [ "$confirmPassword" = "Bye" ]; then			#Check for exit intent
-			confirmQuit "PASS-CHANGE"
-		fi
+		return 1
+	fi
 
-		if [ "${#newPassword}" -ne 5 ] || [ "${#confirmPassword}" -ne 5 ]; then
-			centerText "The supplied password did not meet password standards (5 characters long)" "R" "$red"
-			centerText "Please try again" "R" "$purple"
-			sleep 2
-			clear
-			return 1
-		#Explanation for most of this segment can be found in ./HelperScripts/AdminStuffs.sh -> delAccount, or in commit 7ef8bc7 lines 143-157
-		elif [[ "$newPassword" =~ [^0-9a-zA-Z] ]] || [[ "$confirmPassword" =~ [^0-9a-zA-Z] ]]; then
-			centerText "The supplied password did not meet password standards (alphanumeric only)" "R" "$red"
-			centerText "Please try again" "R" "$purple"
-			sleep 2
-			clear
-			return 1
-		elif [ "$newPassword" = "$confirmPassword" ]; then
-			#I could assume the account is active, but in the future this function may reactivate accounts, so better to check than to assume
-			accountStatus=$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t')
+	#At this point, we know the username is valid and active, and that the user entered the correct pin
+	clear
+	padTop "6"
+	centerText "Details confirmed" "R" "$green"
+	centerText "Please enter the new password for user $tempUsername: " "Q" "1"; read -rs newPassword; echo ""
+	if [ "$newPassword" = "Bye" ]; then				#Check for exit intent
+		confirmQuit "PASS-CHANGE"
+	fi
+	centerText "Please confirm the new password: " "Q" "1"; read -rs confirmPassword
+	if [ "$confirmPassword" = "Bye" ]; then			#Check for exit intent
+		confirmQuit "PASS-CHANGE"
+	fi
 
-			targetID=$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f1 | tr -d '\t')
-			targetLine=$(( targetID+2 ))
-			oldLine=$(cat ./UPP.db | grep "$tempUsername")
+	if [ "${#newPassword}" -ne 5 ] || [ "${#confirmPassword}" -ne 5 ]; then
+		centerText "The supplied password did not meet password standards (5 characters long)" "R" "$red"
+		centerText "Please try again" "R" "$purple"
+		sleep 2
+		clear
+		return 1
+	#Explanation for most of this segment can be found in ./HelperScripts/AdminStuffs.sh -> delAccount, or in commit 7ef8bc7 lines 143-157
+	elif [[ "$newPassword" =~ [^0-9a-zA-Z] ]] || [[ "$confirmPassword" =~ [^0-9a-zA-Z] ]]; then
+		centerText "The supplied password did not meet password standards (alphanumeric only)" "R" "$red"
+		centerText "Please try again" "R" "$purple"
+		sleep 2
+		clear
+		return 1
+	elif [ "$newPassword" = "$confirmPassword" ]; then
+		#I could assume the account is active, but in the future this function may reactivate accounts, so better to check than to assume
+		local accountStatus=$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t')
 
-			#Manually build the line as I cannot find an easy way to substitute one var for another without sed
-			newLine="$targetID,\t$tempUsername,\t$confirmPassword,\t$checkPin,\t$accountStatus"
+		local targetID=$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f1 | tr -d '\t')
+		local targetLine=$(( targetID+2 ))
+		local oldLine=$(cat ./UPP.db | grep "$tempUsername")
 
-			linesBefore=$(( targetLine-1 ))
-			linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-$targetLine ))
+		#Manually build the line as I cannot find an easy way to substitute one var for another without sed
+		local newLine="$targetID,\t$tempUsername,\t$confirmPassword,\t$checkPin,\t$accountStatus"
 
-			mv UPP.db UPP.db.bak
-			echo "$(head -n $linesBefore UPP.db.bak)" > UPP.db
-			echo -e "$newLine" >> UPP.db
-			echo "$(tail -n $linesAfter UPP.db.bak)" >> UPP.db
-			rm UPP.db.bak
+		local linesBefore=$(( targetLine-1 ))
+		local linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-$targetLine ))
 
-			echo -e "\n"; centerText "Password changed successfully" "R" "$green"
-			centerText "Returning to menu in two seconds"
-			sleep 2
-			return 0
-		else
-			centerText "Passwords did not match; Please try again" "R" "$red"
-			sleep 2
-			clear
-			return 1
-		fi
-	done
+		mv UPP.db UPP.db.bak
+		echo "$(head -n $linesBefore UPP.db.bak)" > UPP.db
+		echo -e "$newLine" >> UPP.db
+		echo "$(tail -n $linesAfter UPP.db.bak)" >> UPP.db
+		rm UPP.db.bak
+
+		echo -e "\n"; centerText "Password changed successfully" "R" "$green"
+		echo "Password was successfully changed for User: $tempUsername" >> log.txt
+
+		centerText "Returning to menu in two seconds"
+		sleep 2
+		return 0
+	else
+		centerText "Passwords did not match; Please try again" "R" "$red"
+		sleep 2
+		clear
+		return 1
+	fi
 }
 adminStuffs(){
 	if [ "$username" != "Admin" ]; then									#Reject nonAdmin accounts
