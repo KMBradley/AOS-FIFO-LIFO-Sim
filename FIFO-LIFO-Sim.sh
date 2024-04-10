@@ -358,6 +358,7 @@ callFIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
+	echo "User: $username ran the FIFO sim" >> log.txt
 	. ./HelperScripts/FIFO-Sim.sh		#Source the FIFO-Sim file for functions
 }
 callLIFO(){
@@ -365,6 +366,7 @@ callLIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
+	echo "User: $username ran the LIFO sim" >> log.txt
 	. ./HelperScripts/LIFO-Sim.sh		#Source the LIFO-Sim file for functions
 }
 passChangeHandler(){
@@ -470,7 +472,7 @@ adminStuffs(){
 	fi
 	while true; do
 		#Draw admin menu
-		padTop "Menu"
+		padTop "12"
 		barDraw "T" "$green"
 		centerText "Administrative Options" "M" "$green" "$cyan"
 		barDraw "J" "$green"
