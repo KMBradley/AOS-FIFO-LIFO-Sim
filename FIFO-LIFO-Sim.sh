@@ -180,10 +180,11 @@ loadBar(){
 		refresh="$(( count%2 ))"
 		if [ "$refresh" -eq 0 ]; then
 			clear
-			bar=$(printf "$purple"; echo -n "<"; printf "%*s" $(( $(( barScaler/25 ))*count )) | tr " " "-"; echo ">")
-			barLen=$(( $(( $(( barScaler/25 ))*count ))+2 ))
-			leftGap=$(( $(( termWidth-barLen ))/2 ))
-			textSize=$(( "${#2}"+4 ))
+			local bar=$(printf "$purple"; echo -n "<"; printf "%*s" $(( $(( barScaler/25 ))*count )) | tr " " "-"; echo ">")
+			local barLen=$(( $(( $(( barScaler/25 ))*count ))+2 ))
+			local leftGap=$(( $(( termWidth-barLen ))/2 ))
+			local passedTextSize=${#2}
+			local textSize=$(( passedTextSize+4 ))
 			padTop "3"
 			printf "%*s" $leftGap; printf "$bar"; echo ""
 			printf "$green"; printf "%*s" $(( $(( termWidth-textSize ))/2 )); echo "$2 $(( count*5 ))%"
@@ -238,7 +239,7 @@ genQueue(){
 	while [ "$byteNo" -lt "$count" ]; do
 		#Generate the byte
 		byte=$(head /dev/urandom | od -An -N1 -d)	#https://linuxsimply.com/bash-scripting-tutorial/operator/arithmetic-operators/random-number/
-		byte=$(( $byte % 100 ))						#% 100 was decent advise from a friend for how to constrain the output of od
+		byte=$(( byte % 100 ))						#% 100 was decent advise from a friend for how to constrain the output of od
 
 		#0 pad if needed
 		if [ "${#byte}" -eq 1 ]; then
@@ -254,12 +255,13 @@ genQueue(){
 		fi
 		#Check if byte is already written
 		if [ "$(grep -c $cleanedByte simdata_$username.job)" -ne 0 ]; then
-			#echo "Byte collision, regenning byte $(( $byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
-		elif [ "$byteNo" -eq "$(( count-1)) " ]; then
-			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
+			#Debug echo
+			echo "Byte collision, regenning byte $(( byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
+		elif [ "$byteNo" -eq "$(( count-1 )) " ]; then
+			byteNo=$(( byteNo+1 ))		#Increment by 1 as no collision
 			echo -n "$cleanedByte" >> "simdata_$username.job"
 		else
-			byteNo=$(( $byteNo+1 ))		#Increment by 1 as no collision
+			byteNo=$(( byteNo+1 ))		#Increment by 1 as no collision
 			echo -n "$cleanedByte," >> "simdata_$username.job"
 		fi
 	done
@@ -292,7 +294,7 @@ loginHandler(){
 				confirmQuit "LOGIN"
 			fi
 			centerText "Enter password: " "R"; read -r -s password
-			if [ "$tempPassword" = "Bye" ]; then	#Check for exit intent
+			if [ "$password" = "Bye" ]; then	#Check for exit intent
 				confirmQuit "LOGIN"
 			fi
 			#echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
@@ -513,8 +515,8 @@ adminStuffs(){
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣" >> log.txt
-echo -e "\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
+printf "╠" >> log.txt; printf "%80s" | tr " " "=" >> log.txt; printf "╣" >> log.txt
+echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
 
 #Program loop
 while true; do
