@@ -219,75 +219,84 @@ simStats(){
 		barDraw "B" "$green"
 
 		echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsChoice
+		statsChoice=$(echo "$statsChoice" | tr '[:upper:]' '[:lower:]')
 
-		if [ "$statsChoice" = "Bye" ]; then
+		if [ "$statsChoice" = "bye" ]; then
 			confirmQuit "STATS-MENU"
-		elif [ "$statsChoice" = "Back" ]; then
+		elif [ "$statsChoice" = "back" ]; then
 			break
-		elif [ "$statsChoice" -eq "1" ] || [ "$statsChoice" = "User" ]; then
+		elif [ "$statsChoice" -eq "1" ] || [ "$statsChoice" = "user" ]; then
 			simStatsModeMenu
 			echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsMode
+			statsMode=$(echo "$statsMode" | tr '[:upper:]' '[:lower:]')
 			centerText "Enter the username to get statistics for: " "Q" "5"; read -r findUser
 			findUser=$(echo "$findUser" | tr '[:upper:]' '[:lower:]')
 
 			#Get run counts for the chosen user
-			usageFIFO=$(grep "$findUser" -f ../log.txt | grep -c "FIFO")
-			usageLIFO=$(grep "$findUser" -f ../log.txt | grep -c "LIFO")
+# 			usageFIFO=$(grep "$findUser" -f ../log.txt | grep -c "FIFO")
+			local usageFIFO=$(cat "./log.txt" | grep -fi "$findUser" | grep -c "FIFO")
+# 			usageLIFO=$(grep "$findUser" -f ../log.txt | grep -c "LIFO")
+			local usageLIFO=$(cat "./log.txt" | grep -fi "$findUser" | grep -c "LIFO")
 			usageTotal=$(( UsageFIFO+UsageLIFO ))
 
 			#Show based on selection
-			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "FIFO" ]; then
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then
 				clear
 				padTop 4
 				centerText "FIFO Stats for user: $findUser" "R"
 				centerText "FIFO sims were ran $usageFIFO times" "R"
-			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "LIFO" ]; then
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then
 				clear
 				padTop 4
 				centerText "LIFO Stats for user: $findUser" "R"
 				centerText "LIFO sims were ran $usageLIFO times" "R"
-			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "Overall" ]; then
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then
 				clear
 				padTop 7
 				centerText "Total stats for user: $findUser" "R"
 				centerText "FIFO sims were ran $usageFIFO times" "R"
 				centerText "LIFO sims were ran $usageLIFO times" "R"
 				echo -e "\n"; centerText "Overall, $findUser has run $usageTotal sims!" "R"
-			elif [ "$statsMode" = "Back" ]; then
+			elif [ "$statsMode" = "back" ]; then
 				break;
+			elif [ "$statsMode" = "bye" ]; then
+				confirmQuit "STATS-MENU"
 			else
 				clear; padTop "1"
 				centerText "Invalid option, please try again" "R"
 			fi
-		elif [ "$statsChoice" -eq "2" ] || [ "$statsChoice" = "Global" ]; then
+		elif [ "$statsChoice" -eq "2" ] || [ "$statsChoice" = "global" ]; then
 			simStatsModeMenu
 			echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsMode
+			statsMode=$(echo "$statsMode" | tr '[:upper:]' '[:lower:]')
 
 			#Get global run count
-			usageFIFO=$(grep -c FIFO -f ../log.txt)
-			usageLIFO=$(grep -c LIFO -f ../log.txt)
+# 			usageFIFO=$(grep -c FIFO -f ../log.txt)
+			local usageFIFO=$(cat "./log.txt" | grep -c "FIFO")
+# 			usageLIFO=$(grep -c LIFO -f ../log.txt)
+			local usageLIFO=$(cat "./log.txt" | grep -c "LIFO")
 			usageTotal=$(( usageFIFO+usageLIFO ))
 
-			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "FIFO" ]; then
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then
 				clear
 				padTop 4
 				centerText "Global FIFO runs" "R"
 				centerText "$usageFIFO FIFO sims were ran" "R"
-			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "LIFO" ]; then
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then
 				clear
 				padTop 4
 				centerText "Global LIFO runs" "R"
 				centerText "$usageLIFO LIFO sims were ran" "R"
-			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "Overall" ]; then
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then
 				clear
 				padTop 7
 				centerText "Total global statistics" "R"
 				centerText "$usageFIFO FIFO sims have been run" "R"
 				centerText "$usageLIFO LIFO sims have been run" "R"
-				echo -e "\n"; centerText "Overall, this program has ran $usageTotal simulations!"
-			elif [ "$statsMode" = "Back" ]; then
+				echo -e "\n"; centerText "Overall, this program has ran $usageTotal simulations!" "R"
+			elif [ "$statsMode" = "back" ]; then
 				break;
-			elif [ "$statsMode" = "Bye" ]; then
+			elif [ "$statsMode" = "bye" ]; then
 				confirmQuit "STATS-MENU"
 			else
 				clear; padTop "1"
