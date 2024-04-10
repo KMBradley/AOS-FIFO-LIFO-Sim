@@ -36,6 +36,12 @@ confirmQuit(){
 			local hoursRan=$(( totalTime/3600 ))
 			local minutesRan=$(( $(( totalTime/60 ))-$(( 60*hoursRan )) ))
 			local secondsRan=$(( totalTime%60 ))
+
+			#Make login time notes of the current user before exit
+			logoutTime=$(date +%s)
+			loggedInDuarion=$(( logoutTime-loginTime ))
+			echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
+
 			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" | tee -a log.txt
 			echo -e "END OF RUN at $(date -Iseconds)\n" >> log.txt
 			#Remove lower footer line to cleanup log
@@ -285,7 +291,9 @@ loginHandler(){
 		padTop 1
 		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
 		if [ "$logout" = "Y" ] || [ "$logout" = "y" ]; then
-			echo "User: $username logged out" >> log.txt
+			logoutTime=$(date +%s)
+			loggedInDuarion=$(( logoutTime-loginTime ))
+			echo "User: $username logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
 			username=""
 			clear
 			padTop "1"
@@ -326,6 +334,7 @@ loginHandler(){
 							username="$tempUsername"
 							centerText "Welcome $username" "R"
 							echo "User logged in as $username" >> log.txt
+							loginTime=$(date +%s)
 							tempUsername=""
 							password=""
 
@@ -517,7 +526,7 @@ adminStuffs(){
 			simStats
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 		#	echo "This will allow for a PIN change"
-		elif [ "$adminChoice" = "Back" ]; then
+		elif [ "$adminChoice" = "back" ]; then
 			echo "Returning to main menu"
 			sleep 2
 			clear
