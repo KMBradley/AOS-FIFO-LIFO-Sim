@@ -234,10 +234,10 @@ simStats(){
 
 			#Get run counts for the chosen user
 # 			usageFIFO=$(grep "$findUser" -f ../log.txt | grep -c "FIFO")
-			local usageFIFO=$(cat "./log.txt" | grep -fi "$findUser" | grep -c "FIFO")
+			local usageFIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "FIFO")
 # 			usageLIFO=$(grep "$findUser" -f ../log.txt | grep -c "LIFO")
-			local usageLIFO=$(cat "./log.txt" | grep -fi "$findUser" | grep -c "LIFO")
-			usageTotal=$(( UsageFIFO+UsageLIFO ))
+			local usageLIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "LIFO")
+			local usageTotal=$(( usageFIFO+usageLIFO ))
 
 			#Show based on selection
 			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then
@@ -307,5 +307,67 @@ simStats(){
 			centerText "Invalid option, please try again"
 		fi
 		echo -e "\n"; centerText "Press enter to continue..." "R"; read -r
+	done
+}
+
+#Called with username
+getLoginTime(){
+	local loginTime=0
+
+	#https://stackoverflow.com/a/16318005
+	while read -r hit; do
+		#https://stackoverflow.com/a/52947167
+		thisLoginTime=$(echo "$hit" | grep -i $1 | grep -o -E '[0-9]+')
+		loginTime=$(( loginTime+thisLoginTime ))
+	done < <(cat log.txt | grep -i "logged in for")
+	echo $loginTime
+}
+
+#Be able to show logon time per user, and rank every user registered
+accountRankings(){
+	while true; do
+		clear
+		#Show a menu
+		padTop "12"
+		barDraw "T" "$green"
+		centerText "User Rankings" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "" "M" "$green"
+		centerText "1) User usage time  " "M" "$green" "$cyan"
+		centerText "2)  User rankings   " "M" "$green" "$cyan"
+		centerText "" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "Back" "M" "$green" "$red"
+		barDraw "B" "$green"
+
+		echo -e "\n"; centerText "Enter an option: " "Q" "2"; read -r rankingType
+		rankingType=$(echo "$rankingType" | tr '[:upper:]' '[:lower:]')
+
+		if [ "$rankingType" = "bye" ]; then
+			confirmQuit "RANKINGS"
+		elif [ "$rankingType" = "back" ]; then
+			return 0
+		elif [ "$rankingType" -eq "1" ]; then
+			clear
+			padTop 6
+			centerText "Which user do you wish to find the total time of: " "Q" "5"; read -r rankUser
+			rankUser=$(echo "$rankUser" | tr '[:upper:]' '[:lower:]')
+
+			usersTime=$(getLoginTime "$rankUser")
+			local hoursIn=$(( usersTime/3600 ))
+			local minutesIn=$(( $(( usersTime/60 ))-$(( 60*usersRan )) ))
+			local secondsIn=$(( usersTime%60 ))
+
+			echo ""; centerText "$rankUser has been logged in for a cumulative total of:" "R" "$purple"
+			centerText "$hoursIn hours, $minutesIn minutes and $secondsIn seconds" "R" "$cyan"
+
+			echo ""; centerText "Press enter to continue" "Q" "0"; read -r
+
+		elif [ "$rankingType" -eq "2" ]; then
+			echo ""
+		else
+			echo -e "\n"; centerText "Invalid option; please try again" "R" "$red"
+			sleep 2
+		fi
 	done
 }

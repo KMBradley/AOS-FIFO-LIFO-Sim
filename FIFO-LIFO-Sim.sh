@@ -507,6 +507,7 @@ adminStuffs(){
 		centerText "1)   Create an Account  " "M" "$green" "$cyan"
 		centerText "2)   Delete an Account  " "M" "$green" "$cyan"
 		centerText "3)    Sim Statistics    " "M" "$green" "$cyan"
+		centerText "4)   Account Rankings   " "M" "$green" "$cyan"
 		#centerText "3) Change an Account Pin" "M" "$green" "$cyan"		#Pins should be consistent, removed
 		centerText "" "M" "$green" "$cyan"
 		barDraw "J" "$green"
@@ -524,6 +525,8 @@ adminStuffs(){
 			deleteAccount
 		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "stats" ]; then
 			simStats
+		elif [ "$adminChoice" = "4" ] || [ "$adminChoice" = "rankings" ]; then
+			accountRankings
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 		#	echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "back" ]; then
