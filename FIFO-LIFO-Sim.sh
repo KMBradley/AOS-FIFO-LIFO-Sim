@@ -34,7 +34,7 @@ confirmQuit(){
 
 			#Time conversion from https://stackoverflow.com/a/40782247
 			local hoursRan=$(( totalTime/3600 ))
-			local minutesRan=$(( $(( totalTimex/60 ))-$(( 60*hoursRan )) ))
+			local minutesRan=$(( $(( totalTime/60 ))-$(( 60*hoursRan )) ))
 			local secondsRan=$(( totalTime%60 ))
 			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" | tee -a log.txt
 			echo -e "END OF RUN at $(date -Iseconds)\n" >> log.txt
@@ -220,11 +220,11 @@ drawMainMenu(){
 	centerText "3)    FIFO Sim    " "M" "$cyan" "$default"
 	centerText "4)    LIFO Sim    " "M" "$cyan" "$default"
 	centerText "5)   Pass Change  " "M" "$cyan" "$default"
-	if [ "$username" = "Admin" ]; then
+	if [ "$username" = "admin" ]; then
 		centerText "" "M" "$cyan"
 		barDraw "J" "$cyan"
 		centerText "" "M" "$cyan"
-		centerText "6)   admin    " "M" "$cyan" "$default"
+		centerText "6)   Admin    " "M" "$cyan" "$default"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -492,7 +492,7 @@ adminStuffs(){
 		centerText "" "M" "$green"
 		centerText "1)   Create an Account  " "M" "$green" "$cyan"
 		centerText "2)   Delete an Account  " "M" "$green" "$cyan"
-		centertext "3)    Sim Statistics    " "M" "$green" "$cyan"
+		centerText "3)    Sim Statistics    " "M" "$green" "$cyan"
 		#centerText "3) Change an Account Pin" "M" "$green" "$cyan"		#Pins should be consistent, removed
 		centerText "" "M" "$green" "$cyan"
 		barDraw "J" "$green"

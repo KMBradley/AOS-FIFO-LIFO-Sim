@@ -182,3 +182,121 @@ deleteAccount(){
 		return 0
 	fi
 }
+
+#Same menu is used for per user and global, so it was brought here
+simStatsModeMenu(){
+	clear
+	#Show the submenu
+	padTop "13"
+	barDraw "T" "$green"
+	centerText "Simulation Statistics" "M" "$green" "$cyan"
+	barDraw "J" "$green"
+	centerText "" "M" "$green"
+	centerText "1)  FIFO   " "M" "$green" "$cyan"
+	centerText "2)  LIFO   " "M" "$green" "$cyan"
+	centerText "3) Overall " "M" "$green" "$cyan"
+	centerText "" "M" "$green" "$cyan"
+	barDraw "J" "$green"
+	centerText "Back" "M" "$green" "$red"
+	barDraw "B" "$green"
+}
+
+#Sim popularity contests
+simStats(){
+	while true; do
+		clear
+		#Show a menu
+		padTop "12"
+		barDraw "T" "$green"
+		centerText "Simulation Statistics" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "" "M" "$green"
+		centerText "1) Per User  " "M" "$green" "$cyan"
+		centerText "2)  Global   " "M" "$green" "$cyan"
+		centerText "" "M" "$green" "$cyan"
+		barDraw "J" "$green"
+		centerText "Back" "M" "$green" "$red"
+		barDraw "B" "$green"
+
+		echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsChoice
+
+		if [ "$statsChoice" = "Bye" ]; then
+			confirmQuit "STATS-MENU"
+		elif [ "$statsChoice" = "Back" ]; then
+			break
+		elif [ "$statsChoice" -eq "1" ] || [ "$statsChoice" = "User" ]; then
+			simStatsModeMenu
+			echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsMode
+			centerText "Enter the username to get statistics for: " "Q" "5"; read -r findUser
+			findUser=$(echo "$findUser" | tr '[:upper:]' '[:lower:]')
+
+			#Get run counts for the chosen user
+			usageFIFO=$(grep "$findUser" -f ../log.txt | grep -c "FIFO")
+			usageLIFO=$(grep "$findUser" -f ../log.txt | grep -c "LIFO")
+			usageTotal=$(( UsageFIFO+UsageLIFO ))
+
+			#Show based on selection
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "FIFO" ]; then
+				clear
+				padTop 4
+				centerText "FIFO Stats for user: $findUser" "R"
+				centerText "FIFO sims were ran $usageFIFO times" "R"
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "LIFO" ]; then
+				clear
+				padTop 4
+				centerText "LIFO Stats for user: $findUser" "R"
+				centerText "LIFO sims were ran $usageLIFO times" "R"
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "Overall" ]; then
+				clear
+				padTop 7
+				centerText "Total stats for user: $findUser" "R"
+				centerText "FIFO sims were ran $usageFIFO times" "R"
+				centerText "LIFO sims were ran $usageLIFO times" "R"
+				echo -e "\n"; centerText "Overall, $findUser has run $usageTotal sims!" "R"
+			elif [ "$statsMode" = "Back" ]; then
+				break;
+			else
+				clear; padTop "1"
+				centerText "Invalid option, please try again" "R"
+			fi
+		elif [ "$statsChoice" -eq "2" ] || [ "$statsChoice" = "Global" ]; then
+			simStatsModeMenu
+			echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsMode
+
+			#Get global run count
+			usageFIFO=$(grep -c FIFO -f ../log.txt)
+			usageLIFO=$(grep -c LIFO -f ../log.txt)
+			usageTotal=$(( usageFIFO+usageLIFO ))
+
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "FIFO" ]; then
+				clear
+				padTop 4
+				centerText "Global FIFO runs" "R"
+				centerText "$usageFIFO FIFO sims were ran" "R"
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "LIFO" ]; then
+				clear
+				padTop 4
+				centerText "Global LIFO runs" "R"
+				centerText "$usageLIFO LIFO sims were ran" "R"
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "Overall" ]; then
+				clear
+				padTop 7
+				centerText "Total global statistics" "R"
+				centerText "$usageFIFO FIFO sims have been run" "R"
+				centerText "$usageLIFO LIFO sims have been run" "R"
+				echo -e "\n"; centerText "Overall, this program has ran $usageTotal simulations!"
+			elif [ "$statsMode" = "Back" ]; then
+				break;
+			elif [ "$statsMode" = "Bye" ]; then
+				confirmQuit "STATS-MENU"
+			else
+				clear; padTop "1"
+				centerText "Invalid option, please try again" "R"
+			fi
+		else
+			clear; padTop "1"
+			centerText "Invalid option, please try again"
+		fi
+		echo -e "\n"; centerText "Press enter to continue..." "R"; read -r
+	done
+}
