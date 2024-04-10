@@ -514,9 +514,9 @@ adminStuffs(){
 		centerText "Back" "M" "$green" "$red"
 		barDraw "B" "$green"
 
-		echo -ne '\nEnter an option: '; read -r adminChoice				#Prompt for option
-		adminChoice=$(echo "$adminChoice" | tr '[:upper:]' '[:lower:]')	#Convert to lower case
-		. ./HelperScripts/AdminStuffs.sh								#Source the Admin file for functions
+		echo -e "\n"; centerText "\nEnter an option: " "Q" "1"; read -r adminChoice		#Prompt for option
+		adminChoice=$(echo "$adminChoice" | tr '[:upper:]' '[:lower:]')					#Convert to lower case
+		. ./HelperScripts/AdminStuffs.sh												#Source the Admin file for functions
 
 		#Check input
 		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "create" ]; then

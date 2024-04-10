@@ -362,9 +362,60 @@ accountRankings(){
 			centerText "$hoursIn hours, $minutesIn minutes and $secondsIn seconds" "R" "$cyan"
 
 			echo ""; centerText "Press enter to continue" "Q" "0"; read -r
-
 		elif [ "$rankingType" -eq "2" ]; then
-			echo ""
+			count=1
+			while [ "$count" -lt $(wc -l UPP.db | cut -d' ' -f1 ) ]; do
+				count=$(( count+1 ))
+
+				currentLine=$(head -n "$count" UPP.db | tail -n1)
+				local username=$(echo "$currentLine" | cut -d',' -f2 | tr -d '\t')
+				local loggedInCount=$(cat log.txt | grep -ic $username)
+				echo "$loggedInCount:$username" >> tmp.txt		#Output to a temp file
+			done
+			sort -n tmp.txt &> /dev/null						#Silently sort the output file
+
+			clear
+			totalRankings=$(wc -l tmp.txt | cut -d" " -f1)
+			if [ "$totalRankings" -lt 5 ]; then
+				padTop $(( TotalRankings+8 ))
+				local count=0
+				barDraw "T" "$green"
+				centerText " Top User Rankings" "M" "$green" "$cyan"
+				barDraw "J" "$green"
+				centerText "" "M" "$green"
+				while [ $count -lt "$totalRankings" ]; do
+					count=$(( count+1 ))
+					local info=$(head -n $count tmp.txt | tail -n1 )
+					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1)"
+					if [ $(( "${#stats}"%2 )) -ne 0 ]; then
+						stats=" $stats"
+					fi
+					centerText "$stats" "M" "$green" "$cyan"
+				done
+				centerText "" "M" "$green"
+				barDraw "B" "$green"
+			else
+				padTop "13"
+				local count=0
+				barDraw "T" "$green"
+				centerText " Top User Rankings" "M" "$green" "$cyan"
+				barDraw "J" "$green"
+				centerText "" "M" "$green"
+				while [ $count -lt 5 ]; do
+					count=$(( count+1 ))
+					local info=$(head -n $count tmp.txt | tail -n1 )
+					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1)"
+					if [ $(( "${#stats}"%2 )) -ne 0 ]; then
+						stats=" $stats"
+					fi
+					centerText "$stats" "M" "$green" "$cyan"
+				done
+				centerText "" "M" "$green"
+				barDraw "B" "$green"
+			fi
+
+			echo -e "\n"; centerText "Press enter to exit" "R"; read -r
+			rm tmp.txt
 		else
 			echo -e "\n"; centerText "Invalid option; please try again" "R" "$red"
 			sleep 2
