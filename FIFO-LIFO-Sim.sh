@@ -216,7 +216,7 @@ drawMainMenu(){
 		centerText "" "M" "$cyan"
 		barDraw "J" "$cyan"
 		centerText "" "M" "$cyan"
-		centerText "6)   Admin    " "M" "$cyan" "$default"
+		centerText "6)   admin    " "M" "$cyan" "$default"
 	fi
 	centerText "" "M" "$cyan"
 	barDraw "J" "$cyan"
@@ -276,7 +276,7 @@ loginHandler(){
 		#echo -n 'You are already logged in, logout? Y/N: '; read -r logout
 		padTop 1
 		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
-		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
+		if [ "$logout" = "Y" ] || [ "$logout" = "y" ]; then
 			echo "User: $username logged out" >> log.txt
 			username=""
 			clear
@@ -472,7 +472,7 @@ passChangeHandler(){
 	fi
 }
 adminStuffs(){
-	if [ "$username" != "Admin" ]; then									#Reject nonAdmin accounts
+	if [ "$username" != "admin" ]; then									#Reject nonAdmin accounts
 		return 1
 	fi
 	while true; do
