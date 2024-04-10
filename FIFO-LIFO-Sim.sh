@@ -299,31 +299,31 @@ loginHandler(){
 		while true; do
 			padTop "5"
 			centerText "Enter username: " "Q" "5"; read -r tempUsername
-			if [ "$tempUsername" = "Bye" ]; then	#Check for exit intent
+			tempUsername=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
+			if [ "$tempUsername" = "bye" ]; then	#Check for exit intent
 				confirmQuit "LOGIN"
 			fi
 			centerText "Enter password: " "R"; read -r -s password
-			if [ "$password" = "Bye" ]; then	#Check for exit intent
+			password=$(echo "$password" | tr '[:upper:]' '[:lower:]')
+			if [ "$password" = "bye" ]; then	#Check for exit intent
 				confirmQuit "LOGIN"
 			fi
 			#echo -ne "\nSo you wish to attempt to login as: $tempUsername? Y/N: "; read -r loginConfirm
 			echo -e "\n"; centerText "So you wish to attempt to login as: $tempUsername? Y/N: " "Q" "1"; read -r loginConfirm
+			loginConfirm=$(echo "$loginConfirm" | tr '[:upper:]' '[:lower:]')
 			if [ "$loginConfirm" = "" ] || [ "${#tempUsername}" -eq 0 ]; then
 				echo "No input supplied, returning to menu"
 				return 0
 			fi
-			if [ "$loginConfirm" = "Y" ] || [ "$loginConfirm" = "y" ]; then
+			if [ "$loginConfirm" = "y" ]; then
 				#if [ "$(cat ./UPP.db | grep -c "$tempUsername" -ne 0 | cut -d"," -f3 | tr -d '\t')" = "" ]; then		#Allowed people to login pass only
-				local checkUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
-				echo $checkUN
 				echo $(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')
-				if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$checkUN" ]; then	#Fixes above issue
+				if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then	#Fixes above issue
 					echo "Username match found, checking account status"
 					if [ $(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
 						echo -e "User is set as active, checking password\n"
-						local checkPW=$(echo "$password" | tr '[:upper:]' '[:lower:]')
-						if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f3 | tr -d '\t')" = "$checkPW" ]; then
-							username="$checkUN"
+						if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f3 | tr -d '\t')" = "$password" ]; then
+							username="$tempUsername"
 							centerText "Welcome $username" "R"
 							echo "User logged in as $username" >> log.txt
 							tempUsername=""
@@ -354,9 +354,9 @@ loginHandler(){
 				else
 					echo "Username not found, try again";
 				fi
-			elif [ "$loginConfirm" = "N" ] || [ "$loginConfirm" = "n" ]; then
+			elif [ "$loginConfirm" = "n" ]; then
 				centerText "Please re-enter username and password when prompted" "R"
-			elif [ "$loginConfirm" = "Bye" ]; then			#Check for exit intent
+			elif [ "$loginConfirm" = "bye" ]; then			#Check for exit intent
 				confirmQuit "LOGIN"
 			else
 				centerText "Unknown option, please try again"
@@ -386,20 +386,23 @@ passChangeHandler(){
 	padTop "3"
 	centerText "Password change" "R" "$green"
 	centerText "Please enter the username you wish to change the password for: " "Q" "5"; read -r tempUsername
-	if [ "$tempUsername" = "Bye" ]; then	#Check for exit intent
+	tempUsername=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
+
+	if [ "$tempUsername" = "bye" ]; then	#Check for exit intent
 		confirmQuit "PASS-CHANGE"
 	fi
 	centerText "Please enter the pin for user $tempUsername: " "Q" "3"; read -r -s checkPin
-	if [ "$checkPin" = "Bye" ]; then	#Check for exit intent
+	checkPin=$(echo "$checkPin" | tr '[:upper:]' '[:lower:]')
+	if [ "$checkPin" = "bye" ]; then	#Check for exit intent
 		confirmQuit "PASS-CHANGE"
 	fi
 
 	#Check entered info
-	if [ "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then
+	if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then
 		echo "Username match found, checking account status"
-		if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
+		if [ $(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
 			echo "User is set as active, checking pin"
-			if [ "$checkPin" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f4 | tr -d '\t')" ]; then
+			if [ "$checkPin" = "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f4 | tr -d '\t')" ]; then
 				echo "Pin match"
 			else
 				centerText "Pin does not match, please try again" "R" "$red"
@@ -425,11 +428,13 @@ passChangeHandler(){
 	padTop "6"
 	centerText "Details confirmed" "R" "$green"
 	centerText "Please enter the new password for user $tempUsername: " "Q" "1"; read -rs newPassword; echo ""
-	if [ "$newPassword" = "Bye" ]; then				#Check for exit intent
+	newPassword=$(echo "$newPassword" | tr '[:upper:]' '[:lower:]')
+	if [ "$newPassword" = "bye" ]; then				#Check for exit intent
 		confirmQuit "PASS-CHANGE"
 	fi
 	centerText "Please confirm the new password: " "Q" "1"; read -rs confirmPassword
-	if [ "$confirmPassword" = "Bye" ]; then			#Check for exit intent
+	confirmPassword=$(echo "$confirmPassword" | tr '[:upper:]' '[:lower:]')
+	if [ "$confirmPassword" = "bye" ]; then			#Check for exit intent
 		confirmQuit "PASS-CHANGE"
 	fi
 
@@ -500,14 +505,15 @@ adminStuffs(){
 		barDraw "B" "$green"
 
 		echo -ne '\nEnter an option: '; read -r adminChoice				#Prompt for option
+		adminChoice=$(echo "$adminChoice" | tr '[:upper:]' '[:lower:]')	#Convert to lower case
 		. ./HelperScripts/AdminStuffs.sh								#Source the Admin file for functions
 
 		#Check input
-		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "Create" ]; then
+		if [ "$adminChoice" = "1" ] || [ "$adminChoice" = "create" ]; then
 			makeAccount
-		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "Delete" ]; then
+		elif [ "$adminChoice" = "2" ] || [ "$adminChoice" = "delete" ]; then
 			deleteAccount
-		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Stats" ]; then
+		elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "stats" ]; then
 			simStats
 		#elif [ "$adminChoice" = "3" ] || [ "$adminChoice" = "Change Pin" ]; then
 		#	echo "This will allow for a PIN change"
@@ -516,7 +522,7 @@ adminStuffs(){
 			sleep 2
 			clear
 			return 0
-		elif [ "$adminChoice" = "Bye" ] || [ "$adminChoice" = "bye" ]; then
+		elif [ "$adminChoice" = "bye" ]; then
 			confirmQuit "ADMIN-MENU"
 		else
 			echo "Please enter a valid option from the above menu"
@@ -542,6 +548,7 @@ while true; do
 
 	drawMainMenu
 	echo -ne "\nEnter an option: "; read -r menuChoice
+	menuChoice=$(echo "$menuChoice" | tr '[:upper:]' '[:lower:]')
 	clear	#Ensure there is no residual after entering an option
 
 	if [ "$username" = "" ]; then
@@ -550,21 +557,21 @@ while true; do
 		echo "User $username entered $menuChoice on the main menu" >> log.txt
 	fi
 
-	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "Login" ]; then
+	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "login" ]; then
 		loginHandler
-	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "Regen Sim Data" ]; then
+	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "regen sim data" ]; then
 		clear
 		padTop 1
 		centerText "Enter how many bytes you wish to generate: " "Q" "2"; read -r newSimData
 		genQueue "$newSimData"
-	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "FIFO Sim" ]; then
+	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "fifo sim" ]; then
 		callFIFO
-	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "LIFO Sim" ]; then
+	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "lifo Sim" ]; then
 		callLIFO
-	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "Pass Change" ]; then
+	elif [ "$menuChoice" = "5" ] || [ "$menuChoice" = "pass change" ]; then
 		#Anyone should be able to call for a password change
 		passChangeHandler
-	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "Admin" ]; then
+	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "admin" ]; then
 		if [ "$username" = "admin" ]; then
 			adminStuffs
 		else
@@ -572,10 +579,7 @@ while true; do
 			echo "Unauthorized user attempted to access the admin menu" >> log.txt
 			sleep 2
 		fi
-	elif [ "$menuChoice" = "6" ] || [ "$menuChoice" = "FuncTest" ]; then
-		echo "Function testing mode"
-		logger
-	elif [ "$menuChoice" = "Exit" ] || [ "$menuChoice" = "Bye" ] || [ "$menuChoice" = "bye" ]; then
+	elif [ "$menuChoice" = "exit" ] || [ "$menuChoice" = "bye" ]; then
 		confirmQuit "MENU"
 	else
 		echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
