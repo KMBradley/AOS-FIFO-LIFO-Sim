@@ -277,7 +277,7 @@ loginHandler(){
 		padTop 1
 		centerText "You are already logged in, logout? Y/N: " "Q" "1"; read -r logout
 		if [ "$logout" = "Y" ] || [ "$logout" = "Y" ]; then
-
+			echo "User: $username logged out" >> log.txt
 			username=""
 			clear
 			padTop "1"
@@ -313,6 +313,7 @@ loginHandler(){
 						if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
 							username="$tempUsername"
 							centerText "Welcome $username" "R"
+							echo "User logged in as $username" >> log.txt
 							tempUsername=""
 							password=""
 
