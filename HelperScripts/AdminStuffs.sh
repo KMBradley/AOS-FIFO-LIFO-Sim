@@ -19,7 +19,7 @@ makeAccount(){
 	elif [ "${#tempUsername}" -gt 5 ]; then															#Check if username more than 5 chars
 		echo "Username is too long, please try again"
 		return 1
-	elif [ "$(cat ./UPP.db | grep -c "$tempUsername")" -ne 0 ]; then								#Check if username is in use (Active or Disabled)
+	elif [ "$(cat ./UPP.db | grep -ci "$tempUsername")" -ne 0 ]; then								#Check if username is in use (Active or Disabled)
 		echo "Username is already in use, please try another username"
 		return 1
 	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then															#Test for non alphanumerics
@@ -66,12 +66,14 @@ makeAccount(){
 			#Save account info
 			else
 				echo "Pins matched, writing information to database"
-				currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)									#Find current max user ID
-				thisID=$(( currentMaxID+1 ))														#Add one for this user ID
-				toWrite="$thisID,\t$tempUsername,\t$tempPassword,\t$tempPin,\tACTIVE"				#Format info to match file (comma tab seperated)
+				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
+				local lowerPW=$(echo "$tempPassword" | tr '[:upper:]' '[:lower:]')
+				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)									#Find current max user ID
+				local thisID=$(( currentMaxID+1 ))														#Add one for this user ID
+				local toWrite="$thisID,\t$lowerUN,\t$lowerPW,\t$tempPin,\tACTIVE"				#Format info to match file (comma tab seperated)
 				echo -e $toWrite >> ./UPP.db														#Write info to file
 
-				touch ../simdata_$tempUsername.job													#Make the simdata file
+				touch ../simdata_$lowerUN.job													#Make the simdata file
 				genQueue 10																			#Fill simdata file
 				return 0
 			fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 #Globals
-username="Admin"
+username="admin"
 
 #Colours
 red="\e[31m"
@@ -306,12 +306,16 @@ loginHandler(){
 			fi
 			if [ "$loginConfirm" = "Y" ] || [ "$loginConfirm" = "y" ]; then
 				#if [ "$(cat ./UPP.db | grep -c "$tempUsername" -ne 0 | cut -d"," -f3 | tr -d '\t')" = "" ]; then		#Allowed people to login pass only
-				if [ "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$tempUsername" ]; then	#Fixes above issue
+				local checkUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
+				echo $checkUN
+				echo $(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')
+				if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f2 | tr -d '\t')" = "$checkUN" ]; then	#Fixes above issue
 					echo "Username match found, checking account status"
-					if [ $(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
+					if [ $(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f5 | tr -d '\t') = "ACTIVE" ]; then
 						echo -e "User is set as active, checking password\n"
-						if [ "$password" = "$(cat ./UPP.db | grep "$tempUsername" | cut -d"," -f3 | tr -d '\t')" ]; then
-							username="$tempUsername"
+						local checkPW=$(echo "$password" | tr '[:upper:]' '[:lower:]')
+						if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f3 | tr -d '\t')" = "$checkPW" ]; then
+							username="$checkUN"
 							centerText "Welcome $username" "R"
 							echo "User logged in as $username" >> log.txt
 							tempUsername=""
