@@ -10,8 +10,8 @@ makeAccount(){
 	centerText "Usernames and passwords are 5 alphanumeric chars long, pins are 3 numeric chars long" "R" "$red"		#Reminder for username, password and pin formatting
 
 	#Username creation and availability check
-	echo -ne "\nEnter username: "; read -r tempUsername
-	if [ "$tempUsername" = "Bye" ]; then
+	echo -e "\n"; centerText "Enter username: " "Q" "5"; read -r tempUsername
+	if [ "$tempUsername" = "bye" ]; then
 		confirmQuit "ACCOUNT-MAKE"
 	elif [ "${#tempUsername}" -lt 5 ]; then															#Check if username less than 5 chars
 		echo "Username is too short, please try again"
@@ -28,7 +28,7 @@ makeAccount(){
 	#Password creation and validation
 	else
 		echo "Username is available"
-		echo -ne "\nEnter desired password: "; read -r -s tempPassword
+		echo -e "\n"; centerText "Enter desired password: " "Q" "1"; read -r -s tempPassword
 		echo -ne "\nRe-enter desired password: "; read -r -s confirmPassword
 		echo ""
 		if [ "$tempPassword" != "$confirmPassword" ]; then											#Check if passwords match
@@ -68,13 +68,13 @@ makeAccount(){
 				echo "Pins matched, writing information to database"
 				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
 				local lowerPW=$(echo "$tempPassword" | tr '[:upper:]' '[:lower:]')
-				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)									#Find current max user ID
-				local thisID=$(( currentMaxID+1 ))														#Add one for this user ID
-				local toWrite="$thisID,\t$lowerUN,\t$lowerPW,\t$tempPin,\tACTIVE"				#Format info to match file (comma tab seperated)
-				echo -e $toWrite >> ./UPP.db														#Write info to file
+				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)				#Find current max user ID
+				local thisID=$(( currentMaxID+1 ))										#Add one for this user ID
+				local toWrite="$thisID,\t$lowerUN,\t$lowerPW,\t$tempPin,\tACTIVE"		#Format info to match file (comma tab seperated)
+				echo -e $toWrite >> ./UPP.db											#Write info to file
 
-				touch ../simdata_$lowerUN.job													#Make the simdata file
-				genQueue 10																			#Fill simdata file
+				touch ./simdata_$lowerUN.job											#Make the simdata file
+				genQueue "10" "$lowerUN"													#Pass username to make it for
 				return 0
 			fi
 		fi
@@ -312,7 +312,7 @@ simStats(){
 
 #Called with username
 getLoginTime(){
-	local loginTime=0
+	local loginTime
 
 	#https://stackoverflow.com/a/16318005
 	while read -r hit; do
@@ -387,7 +387,8 @@ accountRankings(){
 					count=$(( count+1 ))
 					local info=$(head -n $count tmp.txt | tail -n1 )
 					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1)"
-					if [ $(( "${#stats}"%2 )) -ne 0 ]; then
+					local lenCheck=${#stats}
+					if [ $(( lencheck%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
 					centerText "$stats" "M" "$green" "$cyan"

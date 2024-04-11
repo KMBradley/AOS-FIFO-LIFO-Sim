@@ -247,9 +247,14 @@ genQueue(){
 	fi
 	byteNo=0
 
-	#Clear simdata file
-	rm "simdata_$username.job"
-	touch "simdata_$username.job"
+	if [ "$#" -ne "2" ]; then
+		#Clear simdata file
+		rm "simdata_$username.job"
+		touch "simdata_$username.job"
+		genFor="$username"
+	else
+		genFor="$2"
+	fi
 
 	while [ "$byteNo" -lt "$count" ]; do
 		#Generate the byte
@@ -269,15 +274,15 @@ genQueue(){
 			loadBar "0.1" "Generating..."
 		fi
 		#Check if byte is already written
-		if [ "$(grep -c $cleanedByte simdata_$username.job)" -ne 0 ]; then
+		if [ "$(grep -c $cleanedByte simdata_$genFor.job)" -ne 0 ]; then
 			#Debug echo
 			echo "Byte collision, regenning byte $(( byteNo+1 ))"	#Needs +1 as byteNo is still on prior byte as this collided
 		elif [ "$byteNo" -eq "$(( count-1 )) " ]; then
 			byteNo=$(( byteNo+1 ))		#Increment by 1 as no collision
-			echo -n "$cleanedByte" >> "simdata_$username.job"
+			echo -n "$cleanedByte" >> "simdata_$genFor.job"
 		else
 			byteNo=$(( byteNo+1 ))		#Increment by 1 as no collision
-			echo -n "$cleanedByte," >> "simdata_$username.job"
+			echo -n "$cleanedByte," >> "simdata_$genFor.job"
 		fi
 	done
 	centerText "Regeneration complete, please press enter to continue" "Q" "0"; read -r
@@ -294,7 +299,7 @@ loginHandler(){
 			logoutTime=$(date +%s)
 			loggedInDuarion=$(( logoutTime-loginTime ))
 			echo "User: $username logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
-			username=""
+			unset username
 			clear
 			padTop "1"
 			centerText "The user has been logged out successfully" "R" "$green" "$green"
@@ -514,7 +519,7 @@ adminStuffs(){
 		centerText "Back" "M" "$green" "$red"
 		barDraw "B" "$green"
 
-		echo -e "\n"; centerText "\nEnter an option: " "Q" "1"; read -r adminChoice		#Prompt for option
+		echo -e "\n"; centerText "Enter an option: " "Q" "1"; read -r adminChoice		#Prompt for option
 		adminChoice=$(echo "$adminChoice" | tr '[:upper:]' '[:lower:]')					#Convert to lower case
 		. ./HelperScripts/AdminStuffs.sh												#Source the Admin file for functions
 
