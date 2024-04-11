@@ -42,11 +42,11 @@ confirmQuit(){
 			loggedInDuarion=$(( logoutTime-loginTime ))
 			echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
 
-			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" | tee -a log.txt
+			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" >> log.txt
 			echo -e "END OF RUN at $(date -Iseconds)\n" >> log.txt
 			#Remove lower footer line to cleanup log
 			#printf "╠" >> log.txt; printf "%80s" | tr " " "═" >> log.txt; printf "╣\n\n\n" >> log.txt
-			sleep 2
+			sleep 1.5
 			clear
 			exit
 		elif [ "$leave" = "N" ] || [ "$leave" = "n" ]; then
@@ -186,7 +186,7 @@ padTop(){
 	fi
 }
 
-#Called with a pause value
+#Called with a pause value and the text to show
 loadBar(){
 	local count=1
 	termWidth=$(stty size | cut -d " " -f 2)
@@ -210,7 +210,9 @@ loadBar(){
 	done
 	clear
 	padTop "1"
-	centerText "Loading Complete!" "$default"
+	centerText "Loading Complete!" "R" "$default"
+	sleep 0.8
+	clear
 	return 0
 }
 
@@ -269,8 +271,8 @@ genQueue(){
 		fi
 
 		if [ "$byteNo" -eq "0" ]; then
-			echo -e "Adding $cleanedByte at start of queue \n--FIRST IN--"
-			sleep 2
+			#echo -e "Adding $cleanedByte at start of queue \n--FIRST IN--"
+			#sleep 2
 			loadBar "0.1" "Generating..."
 		fi
 		#Check if byte is already written
@@ -536,15 +538,14 @@ adminStuffs(){
 		#	echo "This will allow for a PIN change"
 		elif [ "$adminChoice" = "back" ]; then
 			echo "Returning to main menu"
-			sleep 2
 			clear
 			return 0
 		elif [ "$adminChoice" = "bye" ]; then
 			confirmQuit "ADMIN-MENU"
 		else
 			echo "Please enter a valid option from the above menu"
+			sleep 2
 		fi
-		sleep 2
 		clear
 	done
 }
@@ -560,9 +561,10 @@ clear
 printf "|" >> log.txt; printf "%80s" | tr " " "=" >> log.txt; printf "|" >> log.txt
 echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
 
+loadBar "0.18" "Program loading... Please wait"
+
 #Program loop
 while true; do
-
 	drawMainMenu
 	echo -e "\n"; centerText "Enter an option: " "Q" "3"; read -r menuChoice
 	menuChoice=$(echo "$menuChoice" | tr '[:upper:]' '[:lower:]')
