@@ -16,9 +16,9 @@ confirmQuit(){
 	while true; do
 		#Will only ever have no args if it is a sigint
 		if [ "$#" -eq 0 ]; then
-			echo -e "\nSIGINT CAPTURED, exit menu displayed" >> log.txt
+			echo -e "\nSIGINT CAPTURED, exit menu displayed" >> Uasge.db
 		elif [ "$#" -eq 1 ]; then
-			echo -e "\nExit requested from $1; exit menu displayed" >> log.txt
+			echo -e "\nExit requested from $1; exit menu displayed" >> Uasge.db
 		fi
 
 		clear
@@ -42,11 +42,11 @@ confirmQuit(){
 			logoutTime=$(date +%s)
 			loggedInDuarion=$(( logoutTime-loginTime ))
 			#This makes it easy to do user usage time reporting
-			echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
+			echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> Uasge.db
 
 			#Basic log footer
-			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" >> log.txt
-			echo -e "END OF RUN at $(date -Iseconds)\n" >> log.txt
+			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" >> Uasge.db
+			echo -e "END OF RUN at $(date -Iseconds)\n" >> Uasge.db
 			sleep 1.5
 			clear
 			exit
@@ -54,7 +54,7 @@ confirmQuit(){
 			clear
 			padTop "1"
 			centerText "Shortly resuming program from prior prompt..." "R"
-			echo -e "Exit cancelled, program resuming\n" >> log.txt			#Note that the exit was cancelled
+			echo -e "Exit cancelled, program resuming\n" >> Uasge.db			#Note that the exit was cancelled
 			trap "confirmQuit" INT
 			sleep 2
 			return		#Attempt to go back to where exit was requested
@@ -301,7 +301,7 @@ loginHandler(){
 		if [ "$logout" = "Y" ] || [ "$logout" = "y" ]; then
 			logoutTime=$(date +%s)		#Get the unix timestamp
 			loggedInDuarion=$(( logoutTime-loginTime ))	#Calculate login duration and log it
-			echo "User: $username logged out; They were logged in for $loggedInDuarion seconds" >> log.txt
+			echo "User: $username logged out; They were logged in for $loggedInDuarion seconds" >> Uasge.db
 			unset username				#Clear the username variable, thought I had issues with username="" here, so switched to unset to be safe
 			clear
 			padTop "1"
@@ -341,7 +341,7 @@ loginHandler(){
 						if [ "$(cat ./UPP.db | grep -i "$tempUsername" | cut -d"," -f3 | tr -d '\t')" = "$password" ]; then		#Check for pasword match
 							username="$tempUsername"							#Set the username to the temp username
 							centerText "Welcome $username" "R"					#Show login confirm message
-							echo "User logged in as $username" >> log.txt		#Log that they logged in
+							echo "User logged in as $username" >> Uasge.db		#Log that they logged in
 							loginTime=$(date +%s)								#Take note of login time for login duration logging on logout
 							tempUsername=""										#Clear temp username
 							password=""											#Clear temp password
@@ -391,7 +391,7 @@ callFIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
-	echo "User: $username ran the FIFO sim" >> log.txt
+	echo "User: $username ran the FIFO sim" >> Uasge.db
 	. ./HelperScripts/FIFO-Sim.sh		#Source the FIFO-Sim file for functions
 }
 callLIFO(){
@@ -399,7 +399,7 @@ callLIFO(){
 		echo "Please login before trying to run a simulation"
 		return 1
 	fi
-	echo "User: $username ran the LIFO sim" >> log.txt
+	echo "User: $username ran the LIFO sim" >> Uasge.db
 	. ./HelperScripts/LIFO-Sim.sh		#Source the LIFO-Sim file for functions
 }
 passChangeHandler(){
@@ -496,7 +496,7 @@ passChangeHandler(){
 		rm UPP.db.bak												#Remove the backup of the database from before the changes
 
 		echo -e "\n"; centerText "Password changed successfully" "R" "$green"
-		echo "Password was successfully changed for User: $tempUsername" >> log.txt
+		echo "Password was successfully changed for User: $tempUsername" >> Uasge.db
 
 		centerText "Returning to menu in two seconds"
 		sleep 2
@@ -561,8 +561,8 @@ adminStuffs(){
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
-printf "|" >> log.txt; printf "%80s" | tr " " "=" >> log.txt; printf "|" >> log.txt
-echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> log.txt
+printf "|" >> Uasge.db; printf "%80s" | tr " " "=" >> Uasge.db; printf "|" >> Uasge.db
+echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds)\n" >> Uasge.db
 
 loadBar "0.18" "Program loading... Please wait"		#A 0.18 step delay felt about right
 
@@ -575,9 +575,9 @@ while true; do
 
 	#Write menu entry to log
 	if [ "$username" = "" ]; then
-		echo "Unknown user entered $menuChoice on the main menu" >> log.txt
+		echo "Unknown user entered $menuChoice on the main menu" >> Uasge.db
 	else
-		echo "User $username entered $menuChoice on the main menu" >> log.txt
+		echo "User $username entered $menuChoice on the main menu" >> Uasge.db
 	fi
 
 	if [ "$menuChoice" = "1" ] || [ "$menuChoice" = "login" ]; then
@@ -598,7 +598,7 @@ while true; do
 			adminStuffs
 		else		#Silently reject and log
 			echo "Please enter a valid option from the menu, or enter Bye to exit at any time"
-			echo "Unauthorized user attempted to access the admin menu" >> log.txt
+			echo "Unauthorized user attempted to access the admin menu" >> Uasge.db
 			sleep 2
 		fi
 	elif [ "$menuChoice" = "exit" ] || [ "$menuChoice" = "bye" ]; then

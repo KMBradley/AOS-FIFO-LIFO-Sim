@@ -230,8 +230,8 @@ simStats(){
 
 			#Get run counts for the chosen user
 			#Search for the username supplied, then search for how many instances of each sim type were found
-			local usageFIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "FIFO")
-			local usageLIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "LIFO")
+			local usageFIFO=$(cat "./Uasge.db" | grep -i "$findUser" | grep -c "FIFO")
+			local usageLIFO=$(cat "./Uasge.db" | grep -i "$findUser" | grep -c "LIFO")
 			local usageTotal=$(( usageFIFO+usageLIFO ))
 
 			#Show based on selection
@@ -266,8 +266,8 @@ simStats(){
 			statsMode=$(echo "$statsMode" | tr '[:upper:]' '[:lower:]')
 
 			#Get global run count, search for all instances of FIFO and LIFO as there is nothing that logs those words other than the sims
-			local usageFIFO=$(cat "./log.txt" | grep -c "FIFO")
-			local usageLIFO=$(cat "./log.txt" | grep -c "LIFO")
+			local usageFIFO=$(cat "./Uasge.db" | grep -c "FIFO")
+			local usageLIFO=$(cat "./Uasge.db" | grep -c "LIFO")
 			usageTotal=$(( usageFIFO+usageLIFO ))
 
 			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then		#Show only FIFO
@@ -315,7 +315,7 @@ getLoginTime(){
 		#Cause was that the line returned by the first grep not being sanitised, so was including the numbers from the username
 		#Fixed with a cut
 		loginTime=$(( loginTime+thisLoginTime ))
-	done < <(cat log.txt | grep -i "logged in for")
+	done < <(cat Uasge.db | grep -i "logged in for")
 	echo $loginTime
 }
 
@@ -365,7 +365,7 @@ accountRankings(){
 
 				currentLine=$(head -n "$count" UPP.db | tail -n1)		#Get current line by getting the first x lines, then only the last
 				local username=$(echo "$currentLine" | cut -d',' -f2 | tr -d '\t')
-				local loggedInCount=$(cat log.txt | grep -ic $username)
+				local loggedInCount=$(cat Uasge.db | grep -ic $username)
 				echo "$loggedInCount:$username" >> tmp.txt		#Output to a temp file
 			done
 			sort -n tmp.txt &> /dev/null						#Silently sort the output file
