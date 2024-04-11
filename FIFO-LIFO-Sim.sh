@@ -28,7 +28,7 @@ confirmQuit(){
 			clear
 			trap - INT		#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behaviour on exit
 			padTop "1"
-			if [ "$username" != "" ]						#If a user is logged in still
+			if [ "$username" != "" ]; then					#If a user is logged in still
 				loadBar 0.1 "Goodbye $username; Exiting..."
 				#Log footer info
 				local endUnix=$(date +%s)					#Get time as unix timestamp
@@ -217,7 +217,11 @@ loadBar(){
 	done
 	clear
 	padTop "1"
-	centerText "Loading Complete!" "R" "$default"
+	if [ $(echo "$2" | grep -c "Exit") -eq 0 ]; then
+		centerText "Loading Complete!" "R" "$default"
+	else
+		centerText "Program terminated" "R" "$purple"
+	fi
 	sleep 0.8
 	clear
 	return 0
@@ -367,14 +371,14 @@ loginHandler(){
 
 							return 0			#Exit back to menu on successful login
 						else
-							clear; padTop "1"; centerText "Incorrect password, try again" "R" "$red"	#Don't return so they can retry
+							clear; padTop "1"; centerText "Incorrect password, try again" "R" "$red"; sleep 3	#Don't return so they can retry
 						fi
 					else
-						clear; padTop "1"; centerText "Account is marked is inactive, please contact the administrator" "R" "$red"
+						clear; padTop "1"; centerText "Account is marked is inactive, please contact the administrator" "R" "$red"; sleep 3
 						return 1		#Return as account is inactive
 					fi
 				else
-					centerText "Username not found, try again";
+					centerText "Username not found, try again" "R" "$red"; sleep 3
 				fi
 			elif [ "$loginConfirm" = "n" ]; then
 				centerText "Please re-enter username and password when prompted" "R"
@@ -589,8 +593,12 @@ while true; do
 	elif [ "$menuChoice" = "2" ] || [ "$menuChoice" = "regen sim data" ]; then
 		clear
 		padTop 1
-		centerText "Enter how many bytes you wish to generate: " "Q" "2"; read -r newSimData
-		genQueue "$newSimData"
+		if [ "$username" != "" ]; then
+			centerText "Enter how many bytes you wish to generate: " "Q" "2"; read -r newSimData
+			genQueue "$newSimData"
+		else
+			centerText "You need to be logged in to do this" "R" "$purple"; sleep 2
+		fi
 	elif [ "$menuChoice" = "3" ] || [ "$menuChoice" = "fifo sim" ]; then
 		callFIFO
 	elif [ "$menuChoice" = "4" ] || [ "$menuChoice" = "lifo Sim" ]; then
