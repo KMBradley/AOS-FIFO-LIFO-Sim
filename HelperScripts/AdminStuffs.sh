@@ -4,7 +4,7 @@
 
 makeAccount(){
 	clear
-	padTop "8"																						#Pad screen assuming 8 lines of text
+	padTop "18"																						#Pad screen assuming 8 lines of text
 	centerText "Account Creation" "R"																#Show mode to admin
 	echo ""
 	centerText "Usernames and passwords are 5 alphanumeric chars long, pins are 3 numeric chars long" "R" "$red"		#Reminder for username, password and pin formatting
@@ -13,40 +13,40 @@ makeAccount(){
 	echo -e "\n"; centerText "Enter username: " "Q" "5"; read -r tempUsername
 	if [ "$tempUsername" = "bye" ]; then
 		confirmQuit "ACCOUNT-MAKE"
-	elif [ "${#tempUsername}" -lt 5 ]; then															#Check if username less than 5 chars
+	elif [ "${#tempUsername}" -lt 5 ]; then													#Check if username less than 5 chars
 		centerText "Username is too short, please try again" "R" "$red"
 		return 1
-	elif [ "${#tempUsername}" -gt 5 ]; then															#Check if username more than 5 chars
+	elif [ "${#tempUsername}" -gt 5 ]; then													#Check if username more than 5 chars
 		centerText "Username is too long, please try again" "R" "$red"
 		return 1
-	elif [ "$(cat ./UPP.db | grep -ci "$tempUsername")" -ne 0 ]; then								#Check if username is in use (Active or Disabled)
+	elif [ "$(cat ./UPP.db | grep -ci "$tempUsername")" -ne 0 ]; then						#Check if username is in use (Active or Disabled)
 		centerText "Username is already in use, please try another username" "R" "$red"
 		return 1
-	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then															#Test for non alphanumerics
+	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then													#Test for non alphanumerics
 		centerText "Username contains non-alphanumeric characters, please try another username" "R" "$red"
 		return 1
 	#Password creation and validation
 	else
 		centerText "Username is available" "R" "$green"
-		echo -e "\n"; centerText "Enter desired password: " "Q" "1"; read -r -s tempPassword
-		echo -e "\n"; centerText "Re-enter desired password: " "Q" "1"; read -r -s confirmPassword
-		if [ "$tempPassword" != "$confirmPassword" ]; then											#Check if passwords match
+		echo -e "\n"; centerText "Enter desired password: " "Q" "1"; read -r -s tempPassword; echo ""
+		centerText "Re-enter desired password: " "Q" "1"; read -r -s confirmPassword
+		if [ "$tempPassword" != "$confirmPassword" ]; then									#Check if passwords match
 			centerText "Passwords do not match, please try again" "R" "$red"
 			return 1
-		elif [ "${#tempPassword}" -lt 5 ]; then														#Check if password less than 5 chars
+		elif [ "${#tempPassword}" -lt 5 ]; then												#Check if password less than 5 chars
 			centerText "Password is too short, please try again" "R" "$red"
 			return 1
-		elif [ "${#tempPassword}" -gt 5 ]; then														#Check if password more than 5 chars
+		elif [ "${#tempPassword}" -gt 5 ]; then												#Check if password more than 5 chars
 			centerText "Password is too long, please try again" "R" "$red"
 			return 1
-		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then														#Test for non alphanumerics
+		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then
 			centerText "Password contains non-alphanumeric characters, please try another username" "R" "$red"		#I hate that specials aren't allowed here by the brief, but eh
 			return 1
 
 		#Pin creation and validation
 		else
-			centerText "Password confirmed" "R" "$green"
-			echo -e "\n"; centerText "Enter desired pin: " "Q" "1"; read -r -s tempPin
+			echo ""; centerText "Password confirmed" "R" "$green"
+			echo -e "\n"; centerText "Enter desired pin: " "Q" "1"; read -r -s tempPin; echo ""
 			centerText "Confirm pin: " "Q" "1"; read -r -s confirmPin
 			echo ""
 			if [ "$tempPin" != "$confirmPin" ]; then												#Check if pins match
@@ -64,7 +64,7 @@ makeAccount(){
 
 			#Save account info
 			else
-				centerText "Pins matched, writing information to database" "R" "$green"
+				echo ""; centerText "Pins matched, writing information to database" "R" "$green"
 				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')		#Change both to lower
 				local lowerPW=$(echo "$tempPassword" | tr '[:upper:]' '[:lower:]')
 				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)				#Find current max user ID
@@ -104,12 +104,11 @@ deleteAccount(){
 
 	#Find who the ID belongs to
 	if [ "$delType" = "ID" ]; then
-		if [ "$(cat ./UPP.db | grep $usedIdentifier | cut -d',' -f1 | tr -d '\t')" -ne "$usedIdentifier" ]; then
-			centerText "ID number $usedIdentifier does not exist; Please check input and retry" "R"
+		if [ "$(cat ./UPP.db | cut -d',' -f1 | tr -d '\t' | grep -c "$usedIdentifier")" -eq 0 ]; then
+			centerText "ID number $usedIdentifier does not exist; Please check input and retry" "R"; sleep 2
 			return 1
 		else
-			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')
-			#echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByID
+			delUsername=$(cat ./UPP.db | head -n$(( usedIdentifier+2 )) | tail -n1 | cut -d',' -f2 | tr -d '\t')
 			echo -e "\n"; centerText "So you wish to delete user $delUsername? Y/N: " "Q" "1"; read -r confirmDelByID
 			if [ "$confirmDelByID" = "N" ]; then
 				centerText "Aborting..." "R"
@@ -185,12 +184,12 @@ simStatsModeMenu(){
 	#Show the submenu
 	padTop "13"
 	barDraw "T" "$green"
-	centerText "Simulation Statistics" "M" "$green" "$cyan"
+	centerText " Simulation Statistics" "M" "$green" "$cyan"
 	barDraw "J" "$green"
 	centerText "" "M" "$green"
-	centerText "1)  FIFO   " "M" "$green" "$cyan"
-	centerText "2)  LIFO   " "M" "$green" "$cyan"
-	centerText "3) Overall " "M" "$green" "$cyan"
+	centerText "1)   FIFO   " "M" "$green" "$cyan"
+	centerText "2)   LIFO   " "M" "$green" "$cyan"
+	centerText "3)  Overall " "M" "$green" "$cyan"
 	centerText "" "M" "$green" "$cyan"
 	barDraw "J" "$green"
 	centerText "Back" "M" "$green" "$red"
@@ -204,11 +203,11 @@ simStats(){
 		#Show a menu
 		padTop "12"
 		barDraw "T" "$green"
-		centerText "Simulation Statistics" "M" "$green" "$cyan"
+		centerText " Simulation Statistics" "M" "$green" "$cyan"
 		barDraw "J" "$green"
 		centerText "" "M" "$green"
-		centerText "1) Per User  " "M" "$green" "$cyan"
-		centerText "2)  Global   " "M" "$green" "$cyan"
+		centerText "1)  Per User  " "M" "$green" "$cyan"
+		centerText "2)   Global   " "M" "$green" "$cyan"
 		centerText "" "M" "$green" "$cyan"
 		barDraw "J" "$green"
 		centerText "Back" "M" "$green" "$red"
@@ -365,13 +364,15 @@ accountRankings(){
 
 				currentLine=$(head -n "$count" UPP.db | tail -n1)		#Get current line by getting the first x lines, then only the last
 				local username=$(echo "$currentLine" | cut -d',' -f2 | tr -d '\t')
-				local loggedInCount=$(cat Uasge.db | grep -ic $username)
-				echo "$loggedInCount:$username" >> tmp.txt		#Output to a temp file
+				if [ "${#username}" -eq 5 ]; then						#If the username is under 5 chars (junk essentially)
+					local loggedInCount=$(cat Uasge.db | grep -ic $username)
+					echo "$loggedInCount:$username" >> tmp.txt			#Output to a temp file
+				fi
 			done
-			sort -n tmp.txt &> /dev/null						#Silently sort the output file
+			sort -rn tmp.txt -o tmpSort.txt			#Sort the output file
 
 			clear
-			totalRankings=$(wc -l tmp.txt | cut -d" " -f1)
+			totalRankings=$(wc -l tmpSort.txt | cut -d" " -f1)
 			if [ "$totalRankings" -lt 5 ]; then				#If there's less than 5 registered accounts
 				padTop $(( TotalRankings+8 ))
 				local count=0
@@ -383,7 +384,7 @@ accountRankings(){
 				centerText "" "M" "$green"
 				while [ $count -lt "$totalRankings" ]; do
 					count=$(( count+1 ))
-					local info=$(head -n $count tmp.txt | tail -n1 )									#Get the next highest line
+					local info=$(head -n $count tmpSort.txt | tail -n1 )									#Get the next highest line
 					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"	#Format as username: login count
 					local lenCheck=${#stats}															#0 pad if needed
 					if [ $(( lencheck%2 )) -ne 0 ]; then
@@ -402,9 +403,10 @@ accountRankings(){
 				centerText "" "M" "$green"
 				while [ $count -lt 5 ]; do
 					count=$(( count+1 ))
-					local info=$(head -n $count tmp.txt | tail -n1 )
+					local info=$(head -n $count tmpSort.txt | tail -n1 )
 					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"
-					if [ $(( "${#stats}"%2 )) -ne 0 ]; then
+					local lenCheck=${#stats}															#0 pad if needed
+					if [ $(( lencheck%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
 					centerText "$stats" "M" "$green" "$cyan"
@@ -412,7 +414,7 @@ accountRankings(){
 				centerText "" "M" "$green"
 				barDraw "B" "$green"
 			fi
-			rm tmp.txt		#Remove the temp rankings file
+			rm tmp.txt tmpSort.txt			#Remove the temp ranking files
 
 			echo -e "\n"; centerText "Press enter to exit" "R"; read -r
 		else

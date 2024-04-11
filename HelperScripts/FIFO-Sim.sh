@@ -2,11 +2,11 @@
 
 loadBar "0.2" "FIFO Sim Loading: "
 local queue="$(cat simdata_$username.job)"
-echo "Queue to work with: $queue"
+#echo "Queue to work with: $queue"
 
 local byteAmount=$(( $(( ${#queue}+1))/4 ))
-echo "Queue size: $byteAmount"
-read -r
+#echo "Queue size: $byteAmount"
+#read -r
 
 clear
 #Only center vertically if there is enough space to
