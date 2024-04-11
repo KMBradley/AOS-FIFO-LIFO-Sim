@@ -564,7 +564,7 @@ echo -e "\n\nNEW RUN start for terminal: $(echo $TERM) at time: $(date -Iseconds
 while true; do
 
 	drawMainMenu
-	echo -ne "\nEnter an option: "; read -r menuChoice
+	echo -e "\n"; centerText "Enter an option: " "Q" "3"; read -r menuChoice
 	menuChoice=$(echo "$menuChoice" | tr '[:upper:]' '[:lower:]')
 	clear	#Ensure there is no residual after entering an option
 

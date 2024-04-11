@@ -14,58 +14,57 @@ makeAccount(){
 	if [ "$tempUsername" = "bye" ]; then
 		confirmQuit "ACCOUNT-MAKE"
 	elif [ "${#tempUsername}" -lt 5 ]; then															#Check if username less than 5 chars
-		echo "Username is too short, please try again"
+		centerText "Username is too short, please try again" "R" "$red"
 		return 1
 	elif [ "${#tempUsername}" -gt 5 ]; then															#Check if username more than 5 chars
-		echo "Username is too long, please try again"
+		centerText "Username is too long, please try again" "R" "$red"
 		return 1
 	elif [ "$(cat ./UPP.db | grep -ci "$tempUsername")" -ne 0 ]; then								#Check if username is in use (Active or Disabled)
-		echo "Username is already in use, please try another username"
+		centerText "Username is already in use, please try another username" "R" "$red"
 		return 1
 	elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then															#Test for non alphanumerics
-		echo "Username contains non-alphanumeric characters, please try another username"
+		centerText "Username contains non-alphanumeric characters, please try another username" "R" "$red"
 		return 1
 	#Password creation and validation
 	else
-		echo "Username is available"
+		centerText "Username is available" "R" "$green"
 		echo -e "\n"; centerText "Enter desired password: " "Q" "1"; read -r -s tempPassword
-		echo -ne "\nRe-enter desired password: "; read -r -s confirmPassword
-		echo ""
+		echo -e "\n"; centerText "Re-enter desired password: " "Q" "1"; read -r -s confirmPassword
 		if [ "$tempPassword" != "$confirmPassword" ]; then											#Check if passwords match
-			echo "Passwords do not match, please try again"
+			centerText "Passwords do not match, please try again" "R" "$red"
 			return 1
 		elif [ "${#tempPassword}" -lt 5 ]; then														#Check if password less than 5 chars
-			echo "Password is too short, please try again"
+			centerText "Password is too short, please try again" "R" "$red"
 			return 1
 		elif [ "${#tempPassword}" -gt 5 ]; then														#Check if password more than 5 chars
-			echo "Password is too long, please try again"
+			centerText "Password is too long, please try again" "R" "$red"
 			return 1
 		elif [[ "$1" =~ [^0-9a-zA-Z] ]]; then														#Test for non alphanumerics
-			echo "Password contains non-alphanumeric characters, please try another username"		#I hate that specials aren't allowed here by the brief, but eh
+			centerText "Password contains non-alphanumeric characters, please try another username" "R" "$red"		#I hate that specials aren't allowed here by the brief, but eh
 			return 1
 
 		#Pin creation and validation
 		else
-			echo "Password confirmed"
-			echo -ne "\nEnter desired pin "; read -r -s tempPin
-			echo -ne "\nConfirm pin "; read -r -s confirmPin
+			centerText "Password confirmed" "R" "$green"
+			echo -e "\n"; centerText "Enter desired pin: " "Q" "1"; read -r -s tempPin
+			centerText "Confirm pin: " "Q" "1"; read -r -s confirmPin
 			echo ""
 			if [ "$tempPin" != "$confirmPin" ]; then												#Check if pins match
-				echo "Pins do not match, please try again"
+				centerText "Pins do not match, please try again" "R" "$red"
 				return 1
 			elif [ "${#tempPin}" -lt 3 ]; then														#Check if pin less than 3 chars
-				echo "Pin is too short, please try again"
+				centerText "Pin is too short, please try again" "R" "$red"
 				return 1
 			elif [ "${#tempPin}" -gt 3 ]; then														#Check if pin more than 3 chars
-				echo "Pin is too long, please try again"
+				centerText "Pin is too long, please try again" "R" "$red"
 				return 1
 			elif [[ "$1" =~ [^0-9] ]]; then
-				echo "Pin contains non numerics, please try again"
+				centerText "Pin contains non numerics, please try again" "R" "$red"
 				return 1
 
 			#Save account info
 			else
-				echo "Pins matched, writing information to database"
+				centerText "Pins matched, writing information to database" "R" "$green"
 				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
 				local lowerPW=$(echo "$tempPassword" | tr '[:upper:]' '[:lower:]')
 				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)				#Find current max user ID
