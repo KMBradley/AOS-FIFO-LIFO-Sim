@@ -65,7 +65,7 @@ makeAccount(){
 			#Save account info
 			else
 				centerText "Pins matched, writing information to database" "R" "$green"
-				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')
+				local lowerUN=$(echo "$tempUsername" | tr '[:upper:]' '[:lower:]')		#Change both to lower
 				local lowerPW=$(echo "$tempPassword" | tr '[:upper:]' '[:lower:]')
 				local currentMaxID=$(tail -n 1 ./UPP.db | cut -d"," -f1)				#Find current max user ID
 				local thisID=$(( currentMaxID+1 ))										#Add one for this user ID
@@ -91,13 +91,11 @@ deleteAccount(){
 	if [ "$usedIdentifier" = "Bye" ]; then
 		confirmQuit "ACCOUNT-DEL"
 	elif [ "${#usedIdentifier}" -eq 5 ]; then
-		#echo "This is a username"
 		delType="UN"
 	elif [[ "$usedIdentifier" =~ [^0-9] ]]; then
 		centerText "This is not a valid username or pin, please try again" "R" "$red"
 		return 2
 	elif [[ "${#usedIdentifier}" -le 4 ]]; then
-		#echo "This is prolly an ID"
 		delType="ID"
 	else			#Advancement get! \nHow did we even get here?
 		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R" "$purple"
@@ -126,7 +124,6 @@ deleteAccount(){
 			return 1
 		else
 			delUsername=$(cat ./UPP.db | grep "$usedIdentifier" | cut -d"," -f2 | tr -d '\t')	#Not needed, but maybe helps sanitise
-			#echo -ne "\nSo you wish to delete user $delUsername? Y/N: "; read -r confirmDelByUN
 			echo -e "\n"; centerText "So you wish to delete user $delUsername? Y/N: " "Q" "1"; read -r confirmDelByUN
 			if [ "$confirmDelByUN" = "N" ]; then
 				centerText "Aborting..." "R"
@@ -162,7 +159,7 @@ deleteAccount(){
 		#This block is an abomination, and I may as well be Doc Frankenstein for having made it
 		#But; "IT'S ALIVE!!"
 		targetID=$(cat ./UPP.db | grep "$delUsername" | cut -d"," -f1 | tr -d '\t')	#Get the ID of the user
-		targetLine=$(( targetID+2 ))	#Add two so ID is now line number (line 1 is header, line 2 is admin[id 0])
+		targetLine=$(( targetID+2 ))			#Add two so ID is now line number (line 1 is header, line 2 is admin[id 0])
 		oldLine=$(cat ./UPP.db | grep "$delUsername")
 		newLine="${oldLine//ACTIVE/INACTIVE}"	#Bashism to change active to inactive, works on tinycore sh too!
 
@@ -232,24 +229,23 @@ simStats(){
 			findUser=$(echo "$findUser" | tr '[:upper:]' '[:lower:]')
 
 			#Get run counts for the chosen user
-# 			usageFIFO=$(grep "$findUser" -f ../log.txt | grep -c "FIFO")
+			#Search for the username supplied, then search for how many instances of each sim type were found
 			local usageFIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "FIFO")
-# 			usageLIFO=$(grep "$findUser" -f ../log.txt | grep -c "LIFO")
 			local usageLIFO=$(cat "./log.txt" | grep -i "$findUser" | grep -c "LIFO")
 			local usageTotal=$(( usageFIFO+usageLIFO ))
 
 			#Show based on selection
-			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then		#Show only FIFO
 				clear
 				padTop 4
 				centerText "FIFO Stats for user: $findUser" "R"
 				centerText "FIFO sims were ran $usageFIFO times" "R"
-			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then	#Show only LIFO
 				clear
 				padTop 4
 				centerText "LIFO Stats for user: $findUser" "R"
 				centerText "LIFO sims were ran $usageLIFO times" "R"
-			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then	#Show both, and a total
 				clear
 				padTop 7
 				centerText "Total stats for user: $findUser" "R"
@@ -269,24 +265,22 @@ simStats(){
 			echo -e "\n"; centerText "Enter choice: " "Q" "4"; read -r statsMode
 			statsMode=$(echo "$statsMode" | tr '[:upper:]' '[:lower:]')
 
-			#Get global run count
-# 			usageFIFO=$(grep -c FIFO -f ../log.txt)
+			#Get global run count, search for all instances of FIFO and LIFO as there is nothing that logs those words other than the sims
 			local usageFIFO=$(cat "./log.txt" | grep -c "FIFO")
-# 			usageLIFO=$(grep -c LIFO -f ../log.txt)
 			local usageLIFO=$(cat "./log.txt" | grep -c "LIFO")
 			usageTotal=$(( usageFIFO+usageLIFO ))
 
-			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then
+			if [ "$statsMode" -eq "1" ] || [ "$statsMode" = "fifo" ]; then		#Show only FIFO
 				clear
 				padTop 4
 				centerText "Global FIFO runs" "R"
 				centerText "$usageFIFO FIFO sims were ran" "R"
-			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then
+			elif [ "$statsMode" -eq "2" ] || [ "$statsMode" = "lifo" ]; then	#Show only LIFO
 				clear
 				padTop 4
 				centerText "Global LIFO runs" "R"
 				centerText "$usageLIFO LIFO sims were ran" "R"
-			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then
+			elif [ "$statsMode" -eq "3" ] || [ "$statsMode" = "overall" ]; then	#Show both and a running total
 				clear
 				padTop 7
 				centerText "Total global statistics" "R"
@@ -343,22 +337,22 @@ accountRankings(){
 		barDraw "B" "$green"
 
 		echo -e "\n"; centerText "Enter an option: " "Q" "2"; read -r rankingType
-		rankingType=$(echo "$rankingType" | tr '[:upper:]' '[:lower:]')
+		rankingType=$(echo "$rankingType" | tr '[:upper:]' '[:lower:]')		#Convert to lower case
 
 		if [ "$rankingType" = "bye" ]; then
 			confirmQuit "RANKINGS"
-		elif [ "$rankingType" = "back" ]; then
-			return 0
+		elif [ "$rankingType" = "back" ] || [ "$rankingType" = "exit" ]; then
+			return 2
 		elif [ "$rankingType" -eq "1" ]; then
 			clear
 			padTop 6
 			centerText "Which user do you wish to find the total time of: " "Q" "5"; read -r rankUser
 			rankUser=$(echo "$rankUser" | tr '[:upper:]' '[:lower:]')
 
-			usersTime=$(getLoginTime "$rankUser")
-			local hoursIn=$(( usersTime/3600 ))
-			local minutesIn=$(( $(( usersTime/60 ))-$(( 60*usersRan )) ))
-			local secondsIn=$(( usersTime%60 ))
+			usersTime=$(getLoginTime "$rankUser")							#Source for this is in confirmQuit
+			local hoursIn=$(( usersTime/3600 ))								#Divide by 60*60
+			local minutesIn=$(( $(( usersTime/60 ))-$(( 60*hoursIn )) ))	#Divide by 60 and subtract the hour count in minutes
+			local secondsIn=$(( usersTime%60 ))								#Get seconds by dividing by 60 and getting the remainder
 
 			echo ""; centerText "$rankUser has been logged in for a cumulative total of:" "R" "$purple"
 			centerText "$hoursIn hours, $minutesIn minutes and $secondsIn seconds" "R" "$cyan"
@@ -366,10 +360,10 @@ accountRankings(){
 			echo ""; centerText "Press enter to continue" "Q" "0"; read -r
 		elif [ "$rankingType" -eq "2" ]; then
 			count=1
-			while [ "$count" -lt $(wc -l UPP.db | cut -d' ' -f1 ) ]; do
-				count=$(( count+1 ))
+			while [ "$count" -lt $(wc -l UPP.db | cut -d' ' -f1 ) ]; do		#Find number of lines in database
+				count=$(( count+1 ))	#Starting count should be 2, as line 1 is header
 
-				currentLine=$(head -n "$count" UPP.db | tail -n1)
+				currentLine=$(head -n "$count" UPP.db | tail -n1)		#Get current line by getting the first x lines, then only the last
 				local username=$(echo "$currentLine" | cut -d',' -f2 | tr -d '\t')
 				local loggedInCount=$(cat log.txt | grep -ic $username)
 				echo "$loggedInCount:$username" >> tmp.txt		#Output to a temp file
@@ -378,18 +372,20 @@ accountRankings(){
 
 			clear
 			totalRankings=$(wc -l tmp.txt | cut -d" " -f1)
-			if [ "$totalRankings" -lt 5 ]; then
+			if [ "$totalRankings" -lt 5 ]; then				#If there's less than 5 registered accounts
 				padTop $(( TotalRankings+8 ))
 				local count=0
+
+				#High scores style menu
 				barDraw "T" "$green"
-				centerText " Top User Rankings" "M" "$green" "$cyan"
+				centerText " User Login Rankings" "M" "$green" "$cyan"
 				barDraw "J" "$green"
 				centerText "" "M" "$green"
 				while [ $count -lt "$totalRankings" ]; do
 					count=$(( count+1 ))
-					local info=$(head -n $count tmp.txt | tail -n1 )
-					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1)"
-					local lenCheck=${#stats}
+					local info=$(head -n $count tmp.txt | tail -n1 )									#Get the next highest line
+					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"	#Format as username: login count
+					local lenCheck=${#stats}															#0 pad if needed
 					if [ $(( lencheck%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
@@ -401,13 +397,13 @@ accountRankings(){
 				padTop "13"
 				local count=0
 				barDraw "T" "$green"
-				centerText " Top User Rankings" "M" "$green" "$cyan"
+				centerText " User Login Rankings" "M" "$green" "$cyan"
 				barDraw "J" "$green"
 				centerText "" "M" "$green"
 				while [ $count -lt 5 ]; do
 					count=$(( count+1 ))
 					local info=$(head -n $count tmp.txt | tail -n1 )
-					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1)"
+					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"
 					if [ $(( "${#stats}"%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
@@ -416,9 +412,9 @@ accountRankings(){
 				centerText "" "M" "$green"
 				barDraw "B" "$green"
 			fi
+			rm tmp.txt		#Remove the temp rankings file
 
 			echo -e "\n"; centerText "Press enter to exit" "R"; read -r
-			rm tmp.txt
 		else
 			echo -e "\n"; centerText "Invalid option; please try again" "R" "$red"
 			sleep 2
