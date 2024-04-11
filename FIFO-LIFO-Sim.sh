@@ -28,21 +28,25 @@ confirmQuit(){
 			clear
 			trap - INT		#Reset sigint to normal behaviour to allow for unconfirmed exit and normal behaviour on exit
 			padTop "1"
-			centerText "Goodbye $username" "R" "$green" "$green"
-			#Log footer info
-			local endUnix=$(date +%s)					#Get time as unix timestamp
-			local totalTime=$(( endUnix-startUnix ))	#Calculate program runtim
+			if [ "$username" != "" ]						#If a user is logged in still
+				loadBar 0.1 "Goodbye $username; Exiting..."
+				#Log footer info
+				local endUnix=$(date +%s)					#Get time as unix timestamp
+				local totalTime=$(( endUnix-startUnix ))	#Calculate program runtim
 
-			#Time conversion from https://stackoverflow.com/a/40782247
-			local hoursRan=$(( totalTime/3600 ))
-			local minutesRan=$(( $(( totalTime/60 ))-$(( 60*hoursRan )) ))
-			local secondsRan=$(( totalTime%60 ))
+				#Time conversion from https://stackoverflow.com/a/40782247
+				local hoursRan=$(( totalTime/3600 ))
+				local minutesRan=$(( $(( totalTime/60 ))-$(( 60*hoursRan )) ))
+				local secondsRan=$(( totalTime%60 ))
 
-			#Make login time notes of the current user before exit
-			logoutTime=$(date +%s)
-			loggedInDuarion=$(( logoutTime-loginTime ))
-			#This makes it easy to do user usage time reporting
-			echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> Uasge.db
+				#Make login time notes of the current user before exit
+				logoutTime=$(date +%s)
+				loggedInDuarion=$(( logoutTime-loginTime ))
+				#This makes it easy to do user usage time reporting
+				echo "User: $username was forcefully logged out; They were logged in for $loggedInDuarion seconds" >> Uasge.db
+			else
+				loadBar 0.1 "Goodbye; Exiting..."
+			fi
 
 			#Basic log footer
 			echo -e "\nRun lasted $hoursRan hours, $minutesRan minutes and $secondsRan seconds" >> Uasge.db
