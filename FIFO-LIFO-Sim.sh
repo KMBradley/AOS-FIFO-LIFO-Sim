@@ -558,10 +558,6 @@ adminStuffs(){
 }
 
 #Start Program
-#Debug output
-#echo "Term width is: $(stty size | cut -d " " -f 2)"
-#echo "Term height is: $(stty size | cut -d " " -f 1)"
-#sleep 2
 clear
 
 #Logfile header, Middle printf bit from: https://stackoverflow.com/a/5349796
