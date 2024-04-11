@@ -317,7 +317,10 @@ getLoginTime(){
 	#https://stackoverflow.com/a/16318005
 	while read -r hit; do
 		#https://stackoverflow.com/a/52947167
-		thisLoginTime=$(echo "$hit" | grep -i $1 | grep -o -E '[0-9]+')
+		thisLoginTime=$(echo "$hit" | grep -i $1 | cut -d";" -f2 | grep -o -E '[0-9]+')
+		#I had a bug with the above line when a username had numbers in it, caused havoc for a good 30 mins
+		#Cause was that the line returned by the first grep not being sanitised, so was including the numbers from the username
+		#Fixed with a cut
 		loginTime=$(( loginTime+thisLoginTime ))
 	done < <(cat log.txt | grep -i "logged in for")
 	echo $loginTime
