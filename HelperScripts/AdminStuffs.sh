@@ -95,7 +95,7 @@ deleteAccount(){
 	elif [[ "$usedIdentifier" =~ [^0-9] ]]; then
 		centerText "This is not a valid username or pin, please try again" "R" "$red"
 		return 2
-	elif [[ "${#usedIdentifier}" -le 4 ]]; then
+	elif [ "${#usedIdentifier}" -le 4 ]; then
 		delType="ID"
 	else			#Advancement get! \nHow did we even get here?
 		centerText "I don't know how we got here; Input didn't fall into selection criteria" "R" "$purple"
@@ -163,7 +163,7 @@ deleteAccount(){
 		newLine="${oldLine//ACTIVE/INACTIVE}"	#Bashism to change active to inactive, works on tinycore sh too!
 
 		linesBefore=$(( targetLine-1 ))
-		linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-$targetLine ))
+		linesAfter=$(( $(wc -l UPP.db | cut -d" " -f1)-targetLine ))
 
 		#Option 7 from https://www.baeldung.com/linux/insert-line-specific-line-number it is jank, but it works; Thus is it jank?
 		mv UPP.db UPP.db.bak									#Create backup of UPP.db to pull old info from
@@ -374,7 +374,7 @@ accountRankings(){
 			clear
 			totalRankings=$(wc -l tmpSort.txt | cut -d" " -f1)
 			if [ "$totalRankings" -lt 5 ]; then				#If there's less than 5 registered accounts
-				padTop $(( TotalRankings+8 ))
+				padTop $(( totalRankings+8 ))
 				local count=0
 
 				#High scores style menu
@@ -387,7 +387,7 @@ accountRankings(){
 					local info=$(head -n $count tmpSort.txt | tail -n1 )									#Get the next highest line
 					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"	#Format as username: login count
 					local lenCheck=${#stats}															#0 pad if needed
-					if [ $(( lencheck%2 )) -ne 0 ]; then
+					if [ $(( lenCheck%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
 					centerText "$stats" "M" "$green" "$cyan"
@@ -406,7 +406,7 @@ accountRankings(){
 					local info=$(head -n $count tmpSort.txt | tail -n1 )
 					local stats="$(echo $info | cut -d":" -f2): $(echo $info | cut -d":" -f1) times"
 					local lenCheck=${#stats}															#0 pad if needed
-					if [ $(( lencheck%2 )) -ne 0 ]; then
+					if [ $(( lenCheck%2 )) -ne 0 ]; then
 						stats=" $stats"
 					fi
 					centerText "$stats" "M" "$green" "$cyan"
